@@ -107,7 +107,7 @@ public class GossipSender extends Thread {
         StringBuilder msg = new StringBuilder("");
         
         for (Node node : routingTable) {
-            msg.append(node.getIpString()).append(node.getPort()).append(node.getNodeName());
+            msg.append(node.getIpString()).append(node.getPort()).append(node.getUsername().toString());
         }
         
         return msg.toString();

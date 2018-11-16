@@ -80,32 +80,43 @@ public class ProducerConsumer {
                                 + "  <script type=\"text/javascript\" src=\"../../dist/vis.js\"></script>\n"
                                 + "  <link href=\"../../dist/vis-network.min.css\" rel=\"stylesheet\" type=\"text/css\" />\n"
                                 + "\n" + "  <style type=\"text/css\">\n" + "    #mynetwork {\n" + "      width: 1200px;\n"
-                                + "      height: 500px;\n" + "      border: 1px solid lightgray;\n" + "    }\n"
+                                + "      height: 400px;\n" + "      border: 5px solid black;\n" + "    }\n"
                                 + "  </style>\n" + "</head>\n" + "<body>\n" + "\n" + "\n"
-                                + "  <h>Current Network Topology.<h>\n" + "\n" + "\n"
+                                + " <font size=\"20\" color=\"red\"> <h align=\"center\"><b>Current Network Topology.</b><h></font>\n" + "\n" + "\n"
                                 + "<div id=\"mynetwork\"></div>\n" + "\n" + "<script type=\"text/javascript\">\n"
                                 + "  // create an array with nodes";
         
                 String st2 = "// create an array with nodes\n" + "  var nodes = new vis.DataSet([\n"
-                        + "    {id: 1, label: 'Node 1'},\n" + "    {id: 2, label: 'Node 2'},\n"+ "    {id: 7, label: 'Node 7'},\n"
-                        + "    {id: 3, label: 'Node 3'},\n" + "    {id: 4, label: 'Node 4'},\n"+ "    {id: 6, label: 'Node 6'},\n"
-                        + "    {id: 5, label: 'Node 5'}\n";
+                        + "    {id: 1, label: 'Node 1'},\n" + "    {id: 2, label: 'Node 2'},\n"+ "    {id: 3, label: 'Node 3'},\n"
+                        + "    {id: 4, label: 'Node 4'},\n" + "    {id: 5, label: 'Node 5'},\n"+ "    {id: 6, label: 'Node 6'},\n"
+                        +"     {id: 7, label: 'Node 7'},\n" + "    {id: 8, label: 'Node 8'},\n"+ "    {id: 9, label: 'Node 9'},\n"
+                        + "    {id: 10, label: 'Node 10'}\n";
                 String st3 = "  ]);\n" + "\n" + "  // create an array with edges\n" + "  var edges = new vis.DataSet([\n";
     
-                String edgeString ="";
+                StringBuilder edgeString = new StringBuilder();
                 int size = edges.size();
                 int i = 0;
                 String temp =null;
                 for (String edge : edges) {
                     System.out.println(edge);
                     if(i == (size-1)){
-                         temp = "     {from:"+ edge.charAt(0)+", to:"+ edge.charAt(1)+"}\n"; 
+                        if(edge.length()==2){
+                            temp = "     {from:"+ edge.charAt(0)+", to:"+ edge.charAt(1)+"}\n";
+                        }
+                        else {
+                            temp = "     {from:"+ edge.charAt(0)+", to:"+ edge.charAt(1)+edge.charAt(2)+"}\n";
+                        }
                     }
                     else{
-                        temp = "     {from:"+ edge.charAt(0)+", to:"+ edge.charAt(1)+"},\n"; 
+                        if(edge.length()==2) {
+                            temp = "     {from:" + edge.charAt(0) + ", to:" + edge.charAt(1) + "},\n";
+                        }
+                        else {
+                            temp = "     {from:" + edge.charAt(0) + ", to:" + edge.charAt(1)+edge.charAt(2) + "},\n";
+                        }
                     }
         
-                    edgeString+=temp;
+                    edgeString.append(temp);
                     i++;
                 }
                 String st4 = "    {from: 1, to: 3},\n" + "    {from: 1, to: 1},\n" + "    {from: 2, to: 4},\n"+ "    {from: 6, to: 7},\n"
@@ -116,7 +127,7 @@ public class ProducerConsumer {
                         + "  var data = {\n" + "    nodes: nodes,\n" + "    edges: edges\n" + "  };\n"
                         + "  var options = {};\n" + "  var network = new vis.Network(container, data, options);\n"
                         + "</script>\n" + "\n" + "\n" + "</body>\n" + "</html>";
-                fileWriter.write(st1 + st2 + st3 + edgeString + st5 + st6);
+                fileWriter.write(st1 + st2 + st3 + edgeString.toString() + st5 + st6);
                 fileWriter.close();
             }
             catch (IOException e) {
@@ -140,10 +151,9 @@ public class ProducerConsumer {
             Random rnd = new Random();
             // So we can generate random sentences
             Random random = new Random();
-            String[] sentences = new String[] { "12", "13",
-                    "25", "35", "45",
-                    "15","67" };
-            for (int i = 0; i < 7; i++) {
+            String[] sentences = new String[] { "12", "23",
+                    "34", "45", "56", "67","78","89","910" };
+            for (int i = 0; i < 9; i++) {
                 // Pick a sentence at random
                 String sentence = sentences[i];
                 // Send the sentence to the test topic

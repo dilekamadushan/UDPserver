@@ -1,6 +1,7 @@
 package datagram.threadPooled.domain;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * Created by dileka on 10/2/18.
@@ -11,7 +12,9 @@ public class Node {
     
     private String ipString;
     
-    private String nodeName;
+    private UUID username;
+    
+    private int idForDisplay;
     
     private int port;
     
@@ -32,11 +35,27 @@ public class Node {
         
     }
     
-    public Node(byte[] ip, String nodeName, int port) {
+    public Node(byte[] ip, UUID username, int port) {
         this.ip = ip;
-        this.nodeName = nodeName;
+        this.username = username;
         this.port = port;
         
+    }
+    
+    public void setUsername(UUID username) {
+        this.username = username;
+    }
+    
+    public void setIdForDisplay(int idForDisplay) {
+        this.idForDisplay = idForDisplay;
+    }
+    
+    public UUID getUsername() {
+        return username;
+    }
+    
+    public int getIdForDisplay() {
+        return idForDisplay;
     }
     
     public boolean isStatus() {
@@ -65,13 +84,6 @@ public class Node {
         this.ip = ip;
     }
     
-    public String getNodeName() {
-        return nodeName;
-    }
-    
-    public void setNodeName(String nodeName) {
-        this.nodeName = nodeName;
-    }
     
     public int getPort() {
         return port;
@@ -84,7 +96,7 @@ public class Node {
     @Override
     public String toString() {
         
-        return "ip " + new String(ip) + " port:" + this.getPort() + " username: " + this.getNodeName();
+        return "ip " + new String(ip) + " port:" + this.getPort() + " username: " + this.getUsername().toString();
     }
     
     public boolean isJoined() {

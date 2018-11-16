@@ -2,6 +2,7 @@ package datagram.threadPooled.workerThread;
 
 import datagram.threadPooled.domain.Node;
 
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -38,8 +39,9 @@ public class GossipAcceptor extends Thread {
             System.out.println(
                     "Register and Join Messenger:" + Integer.parseInt(ips[0]) + " " + Integer.parseInt(ips[1]) + " "
                             + Integer.parseInt(ips[2]) + " " + Integer.parseInt(ips[3]));
+            UUID uuid = UUID.fromString(hostList[i+2]);
             Node node = new Node(new byte[] { (byte) Integer.parseInt(ips[0]), (byte) Integer.parseInt(ips[1]),
-                    (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, hostList[i + 2],
+                    (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, uuid,
                     Integer.parseInt(hostList[i + 1]));
             node.setIpString(hostList[i]);
             routingTable.add(node);

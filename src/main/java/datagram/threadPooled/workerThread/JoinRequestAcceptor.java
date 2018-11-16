@@ -9,6 +9,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -60,7 +61,7 @@ public class JoinRequestAcceptor implements Runnable {
             System.out.println("JoinRequestAcceptor:The node who sent message: " + request + " is not in the routing table");
             String[] ips = params[2].replace(".", " ").split(" ");
             node = new Node(new byte[] { (byte) Integer.parseInt(ips[0]), (byte) Integer.parseInt(ips[1]),
-                    (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, "From Join Message",
+                    (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, UUID.randomUUID(),
                     Integer.parseInt(params[3]));
             node.setIpString(params[2]);
             node.setJoined(true);

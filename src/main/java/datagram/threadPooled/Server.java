@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -64,7 +65,7 @@ public class Server extends Thread {
     
     private int packetCount = 0;
     
-    public Server(String BSIp, int BSPort, String myIP, int myPort, String username) throws SocketException {
+    public Server(String BSIp, int BSPort, String myIP, int myPort, int IDForDisplay) throws SocketException {
         programeStartedTime = System.currentTimeMillis();
         this.myIP = myIP;
         this.myPort = myPort;
@@ -77,9 +78,10 @@ public class Server extends Thread {
         
         String[] ips = myIP.replace(".", " ").split(" ");
         myNode = new Node(new byte[] { (byte) Integer.parseInt(ips[0]), (byte) Integer.parseInt(ips[1]),
-                (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, username, myPort);
+                (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, UUID.randomUUID(), myPort);
         myNode.setIpString(myIP);
-        registerAndJoinMessenger = new RegisterAndJoinMessenger(BSIp, BSPort, myIP, myPort, username, UDPsocket, toJoinNodes,
+        myNode.setIdForDisplay(IDForDisplay);
+        registerAndJoinMessenger = new RegisterAndJoinMessenger(BSIp, BSPort, myNode, UDPsocket, toJoinNodes,
                 triedToJoinNodes, routingTable);
     }
     
