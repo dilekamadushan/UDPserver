@@ -68,7 +68,7 @@ public class SearchRequestAcceptor implements Runnable {
                 
             } else {
                 System.out.println(" SearchRequestAcceptor:The no.of hops <=3");
-                List<String> foundFiles = fileNames.stream().filter(s -> s.contains(params[4])).collect(toList());
+                List<String> foundFiles = fileNames.stream().filter(s -> s.toLowerCase().equals(params[4].toLowerCase())).collect(toList());
                 
                 if (foundFiles.size()!=0) {
                     System.out.println(" SearchRequestAcceptor:The size of foundFiles:"+foundFiles.size());
@@ -78,6 +78,7 @@ public class SearchRequestAcceptor implements Runnable {
                             System.out.println(" SearchRequestAcceptor:adding to the search result "+fileName+" "+myNode.getIpString());
                             searchResult.addFileName(fileName);
                             searchResult.addNode(myNode);
+                            searchResult.setInUse(true);
                         }
                         
                     } else {

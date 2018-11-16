@@ -190,3 +190,4 @@ public class ProducerConsumer {
     
 }
 //to run-./target/kafka-producer-consumer-1.0-SNAPSHOT.jar producer localhost:9092
+//"139.59.77.98:9092"

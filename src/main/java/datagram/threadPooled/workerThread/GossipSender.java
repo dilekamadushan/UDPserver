@@ -76,7 +76,7 @@ public class GossipSender extends Thread {
                 System.out.println("Gossip Sender:Gossip thread wakes up");
             }
             else {
-                System.out.println("Gossip Sender:Routing table size is 0"+routingTable.size());
+               // System.out.println("Gossip Sender:Routing table size is 0"+routingTable.size());
             }
         
         }

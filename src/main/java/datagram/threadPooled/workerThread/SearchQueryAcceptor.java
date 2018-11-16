@@ -82,7 +82,7 @@ public class SearchQueryAcceptor extends Thread {
                     System.out.println("Search Query Acceptor :The number of data packets received: " + packetCount);
                     break;
                 default:
-                    System.out.println("Search Query Acceptor : in default block:"+query.substring(0, 6)+"ppp");
+                    System.out.println("Search Query Acceptor : in default block:"+query.substring(0, 6));
                     if (query.length() > 7 && "search".equals(query.substring(0, 6))) {
                         System.out.println(
                                 "Search Query Acceptor :The user has requested to search for files by name: " + query

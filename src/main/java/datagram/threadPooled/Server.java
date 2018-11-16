@@ -18,7 +18,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
@@ -42,7 +44,7 @@ public class Server extends Thread {
     
     private ArrayList<Node> triedToJoinNodes;
     
-    private  CopyOnWriteArrayList<Node> routingTable;
+    private CopyOnWriteArrayList<Node> routingTable;
     
     private RegisterAndJoinMessenger registerAndJoinMessenger = null;
     
@@ -60,7 +62,7 @@ public class Server extends Thread {
     
     private ArrayList<String> previousSearchRequsts;
     
-    private int packetCount=0;
+    private int packetCount = 0;
     
     public Server(String BSIp, int BSPort, String myIP, int myPort, String username) throws SocketException {
         programeStartedTime = System.currentTimeMillis();
@@ -89,10 +91,10 @@ public class Server extends Thread {
             System.out.println("Server Thread: Register and join messenger started");
             fileNames = getFile("Files/fileNames.txt");
             SearchQueryAcceptor searchQueryAcceptor = new SearchQueryAcceptor(UDPsocket, routingTable, searchResult,
-                    fileNames, myNode, previousSearchRequsts,packetCount,threadPool);
+                    fileNames, myNode, previousSearchRequsts, packetCount, threadPool);
             searchQueryAcceptor.start();
             System.out.println("Server Thread: Query acceptor started");
-            GossipSender gossipSender = new GossipSender(UDPsocket,myNode,routingTable);
+            GossipSender gossipSender = new GossipSender(UDPsocket, myNode, routingTable);
             gossipSender.start();
             System.out.println("Server Thread: Gossip Sender started");
         }
@@ -126,8 +128,8 @@ public class Server extends Thread {
             try {
                 UDPsocket.receive(packet);
                 System.out.println("Server Thread: Server received a packet ");
-                packetCount+=1;
-                System.out.println("Server Thread: Data packets:"+packetCount);
+                packetCount += 1;
+                System.out.println("Server Thread: Data packets:" + packetCount);
             }
             catch (IOException e) {
                 e.printStackTrace();
@@ -143,7 +145,9 @@ public class Server extends Thread {
                 whoseResponse = checkForJoinResponseMessage(request);
                 
                 if (whoseResponse) {
-                    System.out.println("Server Thread:JOINOK messeage Packet to be handled by Routing Table manager "+routingTable.size()+" ");
+                    System.out.println(
+                            "Server Thread:JOINOK messeage Packet to be handled by Routing Table manager " + routingTable
+                                    .size() + " ");
                     this.threadPool.execute(new JoinResponseAcceptor(this.UDPsocket, routingTable, packet));
                     System.out.println("Server Thread: One Routing table manager started");
                     break;
@@ -154,7 +158,7 @@ public class Server extends Thread {
                 if (whoseResponse) {
                     
                     System.out.println("Server Thread:JOIN messeage Packet to be handled by Routing Table manager ");
-                    this.threadPool.execute(new JoinRequestAcceptor(this.UDPsocket, routingTable, myNode,request));
+                    this.threadPool.execute(new JoinRequestAcceptor(this.UDPsocket, routingTable, myNode, request));
                     System.out.println("Server Thread: One Join Request Acceptor started");
                     break;
                     
@@ -169,23 +173,23 @@ public class Server extends Thread {
                     break;
                     
                 }
-    
+                
                 System.out.println("Server Thread:Not SEROK message");
                 whoseResponse = checkForSearchRequestMessage(request);
                 if (whoseResponse) {
                     System.out.println("Server Thread:SER messeage Packet to be handled by SEARCH handler ");
-                    this.threadPool
-                            .execute(new SearchRequestAcceptor(this.UDPsocket, routingTable, fileNames, myNode, request,false,previousSearchRequsts,searchResult));
+                    this.threadPool.execute(
+                            new SearchRequestAcceptor(this.UDPsocket, routingTable, fileNames, myNode, request, false,
+                                    previousSearchRequsts, searchResult));
                     System.out.println("Server Thread: One Routing table manager started");
                     break;
                 }
-    
+                
                 System.out.println("Server Thread:Not SER message");
                 whoseResponse = checkForGossipRequestMessage(request);
                 if (whoseResponse) {
                     System.out.println("Server Thread:GOSSIP messeage Packet to be handled by GOSSIP handler ");
-                    this.threadPool
-                            .execute(new GossipAcceptor(routingTable, myNode, request));
+                    this.threadPool.execute(new GossipAcceptor(routingTable, myNode, request));
                     System.out.println("Server Thread: One Routing table manager started");
                     break;
                 }
@@ -228,9 +232,13 @@ public class Server extends Thread {
             
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
-                result.add(line);
+                int random = new Random().nextInt(2);
+                System.out.println(random);
+                if (random % 2 == 0) {
+                    String[] words = line.split(" ");
+                    Collections.addAll(result, words);
+                }
             }
-            
             scanner.close();
             
         }
@@ -262,7 +270,6 @@ public class Server extends Thread {
         System.out.println("Server Thread:checking for JOIN response failed" + request);
         return false;
     }
-    
     
     public boolean checkForGossipRequestMessage(String request) {
         
