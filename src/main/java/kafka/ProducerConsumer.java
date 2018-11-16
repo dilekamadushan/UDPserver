@@ -50,8 +50,9 @@ public class ProducerConsumer {
             int noRecordsCount = 0;
             ArrayList<String> edges = new ArrayList<>();
             while (true) {
+                System.out.println("I am at the start");
                 final ConsumerRecords<byte[], byte[]> consumerRecords = consumer.poll(250);
-                
+                System.out.println("I am at the start "+consumerRecords.count());
                 if (consumerRecords.count() == 0) {
                     noRecordsCount++;
                     if (noRecordsCount > giveUp)

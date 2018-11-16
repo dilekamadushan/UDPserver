@@ -17,7 +17,7 @@ public class GossipAcceptor extends Thread {
         
         this.routingTable = routingTable;
         this.gossipMessage = gossipMessage;
-        System.out.println("Gossip Sender: Thread started");
+        System.out.println("Gossip Acceptor: Thread started");
     }
     
     public void run() {
@@ -26,25 +26,26 @@ public class GossipAcceptor extends Thread {
     }
     
     public void addToRoutingTable(String gossipMessage) {
-        System.out.println("Gossip Sender: Trying to decode gossip message " + gossipMessage);
-        String[] params = gossipMessage.split(" ");
-        String[] hostList = params[3].trim().split(" ");
-        for (int i = 0; i < hostList.length; i += 3) {
+        System.out.println("Gossip Acceptor: Trying to decode gossip message " + gossipMessage);
+        String[] hostList = gossipMessage.split(" ");
+        
+        for (int i = 2; i < hostList.length; i += 3) {
             
             System.out.println(
-                    "Register and Join Messenger:Inside the loop:" + hostList[i] + " " + hostList[i + 1] + " " + hostList[i
+                    "Gossip Acceptor:" + hostList[i] + " " + hostList[i + 1] + " " + hostList[i
                             + 2]);
             String[] ips = hostList[i].replace(".", " ").split(" ");
             System.out.println(
-                    "Register and Join Messenger:" + Integer.parseInt(ips[0]) + " " + Integer.parseInt(ips[1]) + " "
+                    "Gossip Acceptor:" + Integer.parseInt(ips[0]) + " " + Integer.parseInt(ips[1]) + " "
                             + Integer.parseInt(ips[2]) + " " + Integer.parseInt(ips[3]));
             Node node = new Node(new byte[] { (byte) Integer.parseInt(ips[0]), (byte) Integer.parseInt(ips[1]),
                     (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, hostList[i + 2],
                     Integer.parseInt(hostList[i + 1]));
             node.setIpString(hostList[i]);
-            routingTable.add(node);
-            System.out.println("Register and Join Messenger: added new node");
+            //routingTable.add(node);
+            System.out.println("Gossip AcceptorGossip Acceptor: added new node");
         }
         
     }
 }
+

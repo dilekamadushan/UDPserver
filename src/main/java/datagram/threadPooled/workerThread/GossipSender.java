@@ -85,7 +85,8 @@ public class GossipSender extends Thread {
     
     private void sendGossip(Node node) throws IOException {
         System.out.println("Gossip Sender:inside send gossip method ");
-        String msg = getFullMessage("GOSSIP "+myNode.getIp()+" "+myNode.getPort()+" "+getGossipMessage());
+        String msg = getFullMessage("GOSSIP "+myNode.getIpString()+" "+myNode.getPort()+" "+myNode.getNodeName()+getGossipMessage());
+        System.out.println("Gossip Sender:Gossip Message begore method:"+msg);
         bufToSend = msg.getBytes();
         System.out.println("Gossip Sender:Gossip Message:"+msg);
         DatagramPacket nodeDatagramPacket = new DatagramPacket(bufToSend, bufToSend.length,
@@ -107,7 +108,8 @@ public class GossipSender extends Thread {
         StringBuilder msg = new StringBuilder("");
         
         for (Node node : routingTable) {
-            msg.append(node.getIpString()).append(node.getPort()).append(node.getNodeName());
+            System.out.println("Gossip Mssage"+msg.toString());
+            msg.append(" ").append(node.getIpString()).append(" ").append(node.getPort()).append(" ").append(node.getNodeName());
         }
         
         return msg.toString();
