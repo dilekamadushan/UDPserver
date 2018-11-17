@@ -65,7 +65,7 @@ public class Server extends Thread {
     
     private int packetCount = 0;
     
-    public Server(String BSIp, int BSPort, String myIP, int myPort, int IDForDisplay) throws SocketException {
+    public Server(String BSIp, int BSPort, String myIP, int myPort, String nodeName, int IDForDisplay) throws SocketException {
         programeStartedTime = System.currentTimeMillis();
         this.myIP = myIP;
         this.myPort = myPort;
@@ -78,9 +78,10 @@ public class Server extends Thread {
         
         String[] ips = myIP.replace(".", " ").split(" ");
         myNode = new Node(new byte[] { (byte) Integer.parseInt(ips[0]), (byte) Integer.parseInt(ips[1]),
-                (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, UUID.randomUUID(), myPort);
+                (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, myPort, nodeName);
         myNode.setIpString(myIP);
         myNode.setIdForDisplay(IDForDisplay);
+        myNode.setSystemUsername(UUID.randomUUID());
         registerAndJoinMessenger = new RegisterAndJoinMessenger(BSIp, BSPort, myNode, UDPsocket, toJoinNodes,
                 triedToJoinNodes, routingTable);
     }

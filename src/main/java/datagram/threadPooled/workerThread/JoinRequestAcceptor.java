@@ -61,11 +61,12 @@ public class JoinRequestAcceptor implements Runnable {
             System.out.println("JoinRequestAcceptor:The node who sent message: " + request + " is not in the routing table");
             String[] ips = params[2].replace(".", " ").split(" ");
             node = new Node(new byte[] { (byte) Integer.parseInt(ips[0]), (byte) Integer.parseInt(ips[1]),
-                    (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, UUID.randomUUID(),
-                    Integer.parseInt(params[3]));
+                    (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) },
+                    Integer.parseInt(params[3]),params[4].substring(0,params[4].length()-1));
             node.setIpString(params[2]);
             node.setJoined(true);
             node.setStatus(true);
+            node.setIdForDisplay(Integer.parseInt(params[4].substring(params[4].length()-2)));
             routingTable.add(node);
             System.out.println("JoinRequestAcceptor:The node" + node.getIpString() + " " + node.getPort()
                     + " is added in the routing table");

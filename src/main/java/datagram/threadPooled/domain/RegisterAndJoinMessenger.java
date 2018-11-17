@@ -1,7 +1,5 @@
 package datagram.threadPooled.domain;
 
-import datagram.threadPooled.Server;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,7 +10,6 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -57,7 +54,7 @@ public class RegisterAndJoinMessenger {
     
     public boolean start() throws IOException {
         System.out.println("Register and Join Messenger:Started");
-        boolean isRegistered = Register(BSIP, BSPort, "REG " + myNode.getIpString() + " " + myNode.getPort() + " " +myNode.getUsername());
+        boolean isRegistered = Register(BSIP, BSPort, "REG " + myNode.getIpString() + " " + myNode.getPort() + " " +myNode.getNodeName()+myNode.getIdForDisplay());
         
         if (isRegistered) {
             System.out.println("Register and Join Messenger:Bootstrap Server Successfully Registered");
@@ -112,7 +109,7 @@ public class RegisterAndJoinMessenger {
                 }
                 
                 System.out.println(
-                        "Register and Join Messenger:last host string " + hostList.toString() + " " + hostList.length);
+                        "Register and Join Messenger:last host string " + hostList + " " + hostList.length);
                 for (int i = 0; i < hostList.length; i += 3) {
                     
                     System.out.println(
@@ -124,12 +121,13 @@ public class RegisterAndJoinMessenger {
                                     + Integer.parseInt(ips[2]) + " " + Integer.parseInt(ips[3]));
                     System.out.println(
                             "Register and Join Messenger:pppppppppp" +hostList[i + 2]);
-                            UUID uuid = UUID.randomUUID();
+                    
                     Node node = new Node(new byte[] { (byte) Integer.parseInt(ips[0]), (byte) Integer.parseInt(ips[1]),
-                            (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, uuid,
-                            Integer.parseInt(hostList[i + 1]));
+                            (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) },
+                            Integer.parseInt(hostList[i + 1]),hostList[i+2].substring(0,hostList[i+2].length()-1));
                     node.setIpString(hostList[i]);
-                    node.setIdForDisplay(Integer.parseInt(hostList[i+2]));
+                    node.setIdForDisplay(Integer.parseInt(hostList[i+2].substring(hostList[i+2].length()-1)));
+                    
                     toJoinNodes.add(node);
                     routingTable.add(node);
                     System.out.println("Register and Join Messenger: added new node" + node.toString());
@@ -185,7 +183,7 @@ public class RegisterAndJoinMessenger {
                     byte[] bufToSend = message.getBytes();
                     DatagramPacket nodeDatagramPacket = new DatagramPacket(bufToSend, bufToSend.length,
                             InetAddress.getByAddress(node.getIp()), node.getPort());
-                    node.setRetries(1);
+                    node.increaseRetries();
                     threadUDPSocket.send(nodeDatagramPacket);
                     System.out.println("Register and Join Messenger: Successfully sent the join message "+message);
                 }
@@ -213,7 +211,7 @@ public class RegisterAndJoinMessenger {
                     byte[] bufToSend = message.getBytes();
                     DatagramPacket nodeDatagramPacket = new DatagramPacket(bufToSend, bufToSend.length,
                             InetAddress.getByAddress(node.getIp()), node.getPort());
-                    node.setRetries(1);
+                    node.increaseRetries();
                     threadUDPSocket.send(nodeDatagramPacket);
                     System.out.println("Register and Join Messenger: Successfully sent the join message "+message);
                 }

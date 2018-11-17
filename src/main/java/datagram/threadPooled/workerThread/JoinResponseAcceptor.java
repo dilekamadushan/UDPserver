@@ -36,10 +36,10 @@ public class JoinResponseAcceptor extends Thread {
         int port = datagramPacket.getPort();
         Node node = routingTable.stream().filter(s -> s.getIpString().equals(datagramPacket.getAddress().getHostAddress())).findFirst()
                 .orElse(null);
-        System.out.println("Routing Table Manager: A node responded to the Join message:" + address + " " + port+" "+routingTable.get(0).getIpString());
+        
         System.out.println("Routing Table Manager: "+datagramPacket.getAddress().getHostAddress());
         if(node != null){
-            node.setStatus(true);
+            System.out.println("Routing Table Manager: A node responded to the Join message:" + address + " " + port+" "+node.getIpString());
             node.setJoined(true);
             System.out.println("Routing Table Manager:The new Routing table ");
         }

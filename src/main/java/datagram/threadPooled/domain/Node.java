@@ -12,13 +12,15 @@ public class Node {
     
     private String ipString;
     
-    private UUID username;
+    private UUID systemUsername;
+    
+    private String nodeName;
     
     private int idForDisplay;
     
     private int port;
     
-    private boolean status = false;
+    private boolean status = true;
     
     private boolean isJoined = false;
     
@@ -35,23 +37,31 @@ public class Node {
         
     }
     
-    public Node(byte[] ip, UUID username, int port) {
+    public Node(byte[] ip, int port ,String  nodeName) {
         this.ip = ip;
-        this.username = username;
+        this.nodeName = nodeName;
         this.port = port;
         
     }
     
-    public void setUsername(UUID username) {
-        this.username = username;
+    public String getNodeName() {
+        return nodeName;
+    }
+    
+    public void setNodeName(String nodeName) {
+        this.nodeName = nodeName;
+    }
+    
+    public void setSystemUsername(UUID systemUsername) {
+        this.systemUsername = systemUsername;
     }
     
     public void setIdForDisplay(int idForDisplay) {
         this.idForDisplay = idForDisplay;
     }
     
-    public UUID getUsername() {
-        return username;
+    public UUID getSystemUsername() {
+        return systemUsername;
     }
     
     public int getIdForDisplay() {
@@ -72,7 +82,7 @@ public class Node {
         return retries;
     }
     
-    public void setRetries(int retries) {
+    public void increaseRetries() {
         this.retries += 1;
     }
     
@@ -96,7 +106,7 @@ public class Node {
     @Override
     public String toString() {
         
-        return "ip " + new String(ip) + " port:" + this.getPort() + " username: " + this.getUsername().toString();
+        return "ip " + new String(ip) + " port:" + this.getPort() + " systemUsername: " + this.getSystemUsername().toString()+" isJoined:"+isJoined()+" status:"+status;
     }
     
     public boolean isJoined() {

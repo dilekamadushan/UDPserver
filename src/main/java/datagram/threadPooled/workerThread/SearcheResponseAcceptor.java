@@ -29,7 +29,7 @@ public class SearcheResponseAcceptor implements Runnable {
         String[] params = searchResponse.split(" ");
         String[] ips = params[3].replace(".", " ").split(" ");
         Node node = new Node(new byte[] { (byte) Integer.parseInt(ips[0]), (byte) Integer.parseInt(ips[1]),
-                (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, UUID.randomUUID(), Integer.parseInt(params[4]));
+                (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, Integer.parseInt(params[4]),"FromSearchResponse");
         for (int i = 5; i < params.length; i++) {
             if (params[i].contains(searchResult.getQuery())) {
                 searchResult.addFileName(params[i]);
@@ -40,6 +40,8 @@ public class SearcheResponseAcceptor implements Runnable {
             
         Node newNode = routingTable.stream().filter(s -> s.getIp() == node.getIp()).findFirst().orElse(null);
         if (newNode == null) {
+            node.setIpString(params[3]);
+            node.setIdForDisplay(0);
             routingTable.add(node);
         }
         } 

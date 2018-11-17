@@ -39,13 +39,25 @@ public class GossipAcceptor extends Thread {
             System.out.println(
                     "Register and Join Messenger:" + Integer.parseInt(ips[0]) + " " + Integer.parseInt(ips[1]) + " "
                             + Integer.parseInt(ips[2]) + " " + Integer.parseInt(ips[3]));
-            UUID uuid = UUID.fromString(hostList[i+2]);
+            
             Node node = new Node(new byte[] { (byte) Integer.parseInt(ips[0]), (byte) Integer.parseInt(ips[1]),
-                    (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, uuid,
-                    Integer.parseInt(hostList[i + 1]));
+                    (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) },
+                    Integer.parseInt(hostList[i + 1]),hostList[i+2].substring(0,hostList[i+2].length()-1));
             node.setIpString(hostList[i]);
-            routingTable.add(node);
-            System.out.println("Register and Join Messenger: added new node");
+            node.setIdForDisplay(Integer.parseInt(hostList[i+2].substring(hostList[i+2].length()-1)));
+    
+            Node member = routingTable.stream().filter(s -> s.getIpString().equals(node.getIpString() ) && s.getPort()==node.getPort()).findFirst().orElse(null);
+            
+            if(member == null){
+                node.setStatus(true);
+                routingTable.add(node);
+                System.out.println("Gossip Acceptor: A node created:" +node.toString());
+            }
+            for(Node peer:routingTable){
+                System.out.println("Gossip Acceptor: "+peer.getIpString());
+                System.out.println("Gossip Acceptor: "+peer.toString());
+        
+            }
         }
         
     }

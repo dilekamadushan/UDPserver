@@ -12,7 +12,7 @@ public class Starter {
         Server server;
         
         try {
-            server = new Server(args[0],Integer.parseInt(args[1]), args[2], Integer.parseInt(args[3]),Integer.parseInt(args[4]));
+            server = new Server(args[0],Integer.parseInt(args[1]), args[2], Integer.parseInt(args[3]),args[4],Integer.parseInt(args[5]));
             System.out.println("Starter: started successfully");
             new Thread(server).start();
             Thread.sleep(20 * 100000);

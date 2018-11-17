@@ -7,7 +7,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -107,7 +106,7 @@ public class GossipSender extends Thread {
         StringBuilder msg = new StringBuilder("");
         
         for (Node node : routingTable) {
-            msg.append(node.getIpString()).append(node.getPort()).append(node.getUsername().toString());
+            msg.append(node.getIpString()).append(node.getPort()).append(node.getSystemUsername().toString());
         }
         
         return msg.toString();
