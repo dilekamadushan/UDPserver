@@ -7,28 +7,26 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.TopicPartition;
+import org.json.JSONObject;
 
 import java.util.Collection;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class KafkaProducer extends Thread {
+public class KafkaLogger {
     
     private boolean running;
     
     private org.apache.kafka.clients.producer.KafkaProducer<String, String> producer;
     
-    private String groupId = "my-group";
+    private String groupId = "my-group-log";
     
-    private String topic = "topology";
+    private String topic = "sample-log";
     
     private TestCallback testCallback;
     
-    private CopyOnWriteArrayList<Node> routingTable;
     
-    private Node myNode;
-    
-    public KafkaProducer(Node myNode, CopyOnWriteArrayList<Node> routingTable, boolean running) {
+    public KafkaLogger(boolean running) {
         //run the program with args: producer/consumer broker:port
         String brokers = "139.59.77.98:9092";
         
@@ -42,47 +40,29 @@ public class KafkaProducer extends Thread {
         
         producer = new org.apache.kafka.clients.producer.KafkaProducer<>(props);
         testCallback = new TestCallback();
-        this.routingTable = routingTable;
-        this.myNode = myNode;
         this.running = running;
     }
-    
-    public void run() {
-        while (running) {
-            try {
-                System.out.println("Kafka Producer:Kafka producer sleeps  for 120 seconds ");
-                Thread.sleep(1000 * 15);
-                System.out.println("Kafka Producer:Kafka producer wakes ");
-                produce();
-            }
-            catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+
+    public void log(int nodeName, String level) {
         
-        closeProducer();
+        JSONObject jo = new JSONObject();
+        jo.put("name", String.valueOf(nodeName));
+        jo.put("message", "FromUDPServerForMonitoring");
+        jo.put("level", level);
+        jo.put("class", "UDPServer");
         
-    }
-    
-    private void produce() {
-    
-        for (Node aRoutingTable : routingTable) {
-            if (aRoutingTable.isStatus()) {
-                String edge = "" + myNode.getIdForDisplay() + aRoutingTable.getIdForDisplay();
-            
-                // Send the sentence to the test topic
-                ProducerRecord<String, String> data = new ProducerRecord<>(topic, edge);
-                long startTime = System.currentTimeMillis();
-                producer.send(data, testCallback);
-                long elapsedTime = System.currentTimeMillis() - startTime;
-                System.out.println("Sent this edge: " + edge + " in " + elapsedTime + " ms");
-            }
-        }
+        // Send the sentence to the test topic
+        ProducerRecord<String, String> data = new ProducerRecord<>(topic, jo.toString());
+        long startTime = System.currentTimeMillis();
+        producer.send(data, testCallback);
+        long elapsedTime = System.currentTimeMillis() - startTime;
+        System.out.println("Kafka Logger:Sent this edge: " + jo + " in " + elapsedTime + " ms");
+        
         System.out.println("Done");
         producer.flush();
     }
     
-    private void closeProducer() {
+    public void closeProducer() {
         
         producer.close();
         

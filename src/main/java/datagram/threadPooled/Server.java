@@ -3,11 +3,15 @@ package datagram.threadPooled;
 import datagram.threadPooled.domain.Node;
 import datagram.threadPooled.domain.RegisterAndJoinMessenger;
 import datagram.threadPooled.domain.SearchResult;
+import datagram.threadPooled.workerThread.CommandAcceptor;
 import datagram.threadPooled.workerThread.GossipAcceptor;
 import datagram.threadPooled.workerThread.GossipSender;
+import datagram.threadPooled.workerThread.HeartBeatRequestAcceptor;
+import datagram.threadPooled.workerThread.HeartBeatSender;
 import datagram.threadPooled.workerThread.JoinRequestAcceptor;
 import datagram.threadPooled.workerThread.JoinResponseAcceptor;
-import datagram.threadPooled.workerThread.SearchQueryAcceptor;
+import datagram.threadPooled.workerThread.KafkaLogger;
+import datagram.threadPooled.workerThread.KafkaProducer;
 import datagram.threadPooled.workerThread.SearchRequestAcceptor;
 import datagram.threadPooled.workerThread.SearcheResponseAcceptor;
 
@@ -18,7 +22,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
@@ -33,7 +36,7 @@ import java.util.stream.Collectors;
  */
 public class Server extends Thread {
     
-    protected ExecutorService threadPool = Executors.newFixedThreadPool(20);
+    private ExecutorService threadPool = Executors.newFixedThreadPool(20);
     
     private DatagramSocket UDPsocket;
     
@@ -51,37 +54,55 @@ public class Server extends Thread {
     
     private String myIP;
     
+    private String BSIP;
+    
     private int myPort;
+    
+    private int BSPort;
     
     private long programeStartedTime;
     
-    private ArrayList<String> fileNames;
+    private CopyOnWriteArrayList<String> fileNames;
     
     private SearchResult searchResult = new SearchResult();
     
     private Node myNode;
     
-    private ArrayList<String> previousSearchRequsts;
+    private CopyOnWriteArrayList<String> previousSearchRequsts;
+    
+    private CopyOnWriteArrayList<String> previousSearchResponses;
+    
+    // private CopyOnWriteArrayList<String> previousSentSearchResponses;
     
     private int packetCount = 0;
     
-    public Server(String BSIp, int BSPort, String myIP, int myPort, String nodeName, int IDForDisplay) throws SocketException {
+    private KafkaLogger kafkaLogger;
+    
+    private int myIdForDisplay;
+    
+    
+    Server(String BSIp, int BSPort, String myIP, String myPort, String nodeName) throws SocketException {
         programeStartedTime = System.currentTimeMillis();
         this.myIP = myIP;
-        this.myPort = myPort;
-        UDPsocket = new DatagramSocket(myPort);
+        this.BSIP = BSIp;
+        this.myPort = Integer.parseInt(myPort);
+        this.BSPort = BSPort;
+        UDPsocket = new DatagramSocket(this.myPort);
         toJoinNodes = new ArrayList<>();
         triedToJoinNodes = new ArrayList<>();
         toJoinNodes = new ArrayList<>();
         routingTable = new CopyOnWriteArrayList<>();
-        previousSearchRequsts = new ArrayList<>();
+        previousSearchRequsts = new CopyOnWriteArrayList<>();
+        previousSearchResponses = new CopyOnWriteArrayList<>();
+        //previousSentSearchResponses = new CopyOnWriteArrayList<>();
         
         String[] ips = myIP.replace(".", " ").split(" ");
         myNode = new Node(new byte[] { (byte) Integer.parseInt(ips[0]), (byte) Integer.parseInt(ips[1]),
-                (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, myPort, nodeName);
+                (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, this.myPort, nodeName,
+                UUID.randomUUID());
         myNode.setIpString(myIP);
-        myNode.setIdForDisplay(IDForDisplay);
-        myNode.setSystemUsername(UUID.randomUUID());
+        this.myIdForDisplay=Integer.parseInt(myPort.substring(myPort.length() - 1));
+        myNode.setIdForDisplay(myIdForDisplay);
         registerAndJoinMessenger = new RegisterAndJoinMessenger(BSIp, BSPort, myNode, UDPsocket, toJoinNodes,
                 triedToJoinNodes, routingTable);
     }
@@ -93,13 +114,23 @@ public class Server extends Thread {
             System.out.println("Server Thread:This is the status 1st place" + running);
             System.out.println("Server Thread: Register and join messenger started");
             fileNames = getFile("Files/fileNames.txt");
-            SearchQueryAcceptor searchQueryAcceptor = new SearchQueryAcceptor(UDPsocket, routingTable, searchResult,
-                    fileNames, myNode, previousSearchRequsts, packetCount, threadPool);
-            searchQueryAcceptor.start();
+            System.out.println("Server Thread: No of files is:"+fileNames.size());
+            CommandAcceptor commandAcceptor = new CommandAcceptor(running,UDPsocket, routingTable, searchResult, fileNames, myNode,
+                    previousSearchRequsts, previousSearchResponses, packetCount, BSIP, BSPort, threadPool);
+            commandAcceptor.start();
             System.out.println("Server Thread: Query acceptor started");
-            GossipSender gossipSender = new GossipSender(UDPsocket, myNode, routingTable);
+            GossipSender gossipSender = new GossipSender(running,UDPsocket, myNode, routingTable);
             gossipSender.start();
             System.out.println("Server Thread: Gossip Sender started");
+            
+            KafkaProducer kafkaProducer = new KafkaProducer(myNode, routingTable, running);
+            kafkaProducer.start();
+            System.out.println("Server Thread: Kafka producer started");
+            
+            HeartBeatSender heartBeatSender = new HeartBeatSender(UDPsocket, myNode, BSIP, BSPort, routingTable);
+            heartBeatSender.start();
+            System.out.println("Server Thread: Heart Beat Sender started");
+            kafkaLogger = new KafkaLogger(running);
         }
         catch (ConnectException ce) {
             System.out.println("Server Thread:Bootstrap server unreachable");
@@ -117,8 +148,8 @@ public class Server extends Thread {
         while (running) {
             System.out.println("Server Thread:Server inside the running loop");
             executionTime = System.currentTimeMillis();
-            if ((executionTime - programeStartedTime) / 1000 > 300) {
-                System.out.println("Server Thread: More than 5 minutes since the start");
+            if ((executionTime - programeStartedTime) / 1000 > 12000) {
+                System.out.println("Server Thread: More than 10 minutes since the start");
                 List<Node> nodes = routingTable.stream().filter(Node::isJoined).collect(Collectors.toList());
                 if (nodes.size() < 2) {
                     System.out.println(
@@ -153,16 +184,17 @@ public class Server extends Thread {
                                     .size() + " ");
                     this.threadPool.execute(new JoinResponseAcceptor(this.UDPsocket, routingTable, packet));
                     System.out.println("Server Thread: One Routing table manager started");
+                    kafkaLogger.log(myIdForDisplay,"JOINOK");
                     break;
                     
                 }
-                System.out.println("Server Thread:Not JOINOK message");
                 whoseResponse = checkForJoinRequestMessage(request);
                 if (whoseResponse) {
                     
-                    System.out.println("Server Thread:JOIN messeage Packet to be handled by Routing Table manager ");
+                    System.out.println("Server Thread:JOIN messeage Packet to be handled by Join Requestor ");
                     this.threadPool.execute(new JoinRequestAcceptor(this.UDPsocket, routingTable, myNode, request));
                     System.out.println("Server Thread: One Join Request Acceptor started");
+                    kafkaLogger.log(myIdForDisplay,"JOIN");
                     break;
                     
                 }
@@ -170,9 +202,11 @@ public class Server extends Thread {
                 whoseResponse = checkForSearchResponseMessage(request);
                 if (whoseResponse) {
                     
-                    System.out.println("Server Thread:SEROK messeage Packet to be handled by SEARCH handler");
-                    this.threadPool.execute(new SearcheResponseAcceptor(routingTable, searchResult, request));
-                    System.out.println("Server Thread: One Routing table manager started");
+                    System.out.println("Server Thread:SEROK messeage Packet to be handled by SEARCH Response handler");
+                    this.threadPool.execute(
+                            new SearcheResponseAcceptor(packetCount,routingTable, previousSearchResponses, myNode, searchResult,
+                                    request));
+                    System.out.println("Server Thread: One Search Response Acceptor started");
                     break;
                     
                 }
@@ -180,11 +214,12 @@ public class Server extends Thread {
                 System.out.println("Server Thread:Not SEROK message");
                 whoseResponse = checkForSearchRequestMessage(request);
                 if (whoseResponse) {
-                    System.out.println("Server Thread:SER messeage Packet to be handled by SEARCH handler ");
+                    System.out.println("Server Thread:SER messeage Packet to be handled by SEARCH Request handler ");
                     this.threadPool.execute(
-                            new SearchRequestAcceptor(this.UDPsocket, routingTable, fileNames, myNode, request, false,
+                            new SearchRequestAcceptor(packetCount,this.UDPsocket, routingTable, fileNames, myNode, request, false,
                                     previousSearchRequsts, searchResult));
-                    System.out.println("Server Thread: One Routing table manager started");
+                    System.out.println("Server Thread: One Search Request Acceptor started");
+                    kafkaLogger.log(myIdForDisplay,"SEROK");
                     break;
                 }
                 
@@ -193,39 +228,36 @@ public class Server extends Thread {
                 if (whoseResponse) {
                     System.out.println("Server Thread:GOSSIP messeage Packet to be handled by GOSSIP handler ");
                     this.threadPool.execute(new GossipAcceptor(routingTable, myNode, request));
-                    System.out.println("Server Thread: One Routing table manager started");
+                    System.out.println("Server Thread: One GOSSIP handler started");
+                    kafkaLogger.log(myIdForDisplay,"SER");
                     break;
                 }
                 
                 System.out.println("Server Thread:Not GOSSIP message");
+                whoseResponse = checkForHeartBeatMessage(request);
+                if (whoseResponse) {
+                    System.out.println("Server Thread:HeartBeat messeage Packet to be handled by HeartBeat handler ");
+                    this.threadPool.execute(new HeartBeatRequestAcceptor(routingTable, myNode, request));
+                    System.out.println("Server Thread: Heart Beat Acceptor started");
+                    break;
+                }
+                
+                System.out.println("Server Thread:Not HeartBeat message");
                 System.out.println("Server Thread: Couldn't Figure Out the handler for message " + request);
                 whoseResponse = true;
             }
-            System.out.println("Server Thread: Figured Out the handler");
-            
             System.out.println("Server Thread:Clear the buffer after every message");
             buf = new byte[256];
         }
         System.out.println("Server Thread:Server interrupted, Exiting");
         UDPsocket.close();
+        kafkaLogger.closeProducer();
         System.out.println("Server Thread:Socket Closed");
     }
     
-    public String data(byte[] a) {
-        if (a == null)
-            return null;
-        StringBuilder ret = new StringBuilder();
-        int i = 0;
-        while (a[i] != 0) {
-            ret.append((char) a[i]);
-            i++;
-        }
-        return ret.toString();
-    }
-    
-    private ArrayList<String> getFile(String fileName) {
+    private CopyOnWriteArrayList<String> getFile(String fileName) {
         
-        ArrayList<String> result = new ArrayList<>();
+        CopyOnWriteArrayList<String> result = new CopyOnWriteArrayList<>();
         
         //Get file from resources folder
         ClassLoader classLoader = getClass().getClassLoader();
@@ -235,11 +267,12 @@ public class Server extends Thread {
             
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
-                int random = new Random().nextInt(2);
+                int random = new Random().nextInt(100);
                 System.out.println(random);
-                if (random % 2 == 0) {
-                    String[] words = line.split(" ");
-                    Collections.addAll(result, words);
+                if (random % 2 == 1) {
+                    //String[] words = line.split(" ");
+                    //Collections.addAll(result, line);
+                    result.add(line);
                 }
             }
             scanner.close();
@@ -253,7 +286,7 @@ public class Server extends Thread {
         
     }
     
-    public boolean checkForJoinResponseMessage(String request) {
+    private boolean checkForJoinResponseMessage(String request) {
         
         System.out.println("Server Thread:checking for JOINOK response" + request);
         if (request.contains("JOINOK")) {
@@ -264,7 +297,7 @@ public class Server extends Thread {
         return false;
     }
     
-    public boolean checkForJoinRequestMessage(String request) {
+    private boolean checkForJoinRequestMessage(String request) {
         
         System.out.println("Server Thread:checking for JOIN request" + request);
         if (request.contains("JOIN")) {
@@ -274,30 +307,34 @@ public class Server extends Thread {
         return false;
     }
     
-    public boolean checkForGossipRequestMessage(String request) {
+    private boolean checkForGossipRequestMessage(String request) {
         
         System.out.println("Server Thread:checking for gossip request" + request);
-        if (request.contains("GOSSIP")) {
-            return true;
-        }
-        return false;
+        return request.contains("GOSSIP");
     }
     
-    public boolean checkForSearchRequestMessage(String request) {
+    private boolean checkForSearchRequestMessage(String request) {
         
         System.out.println("Server Thread:checking for search request" + request);
-        if (request.contains("SER")) {
-            return true;
-        }
-        return false;
+        return request.contains("SER");
     }
     
-    public boolean checkForSearchResponseMessage(String request) {
+    private boolean checkForSearchResponseMessage(String request) {
         
         System.out.println("Server Thread:checking for search response" + request);
-        if (request.contains("SEROK")) {
-            return true;
-        }
-        return false;
+        return request.contains("SEROK");
     }
+    
+    private boolean checkForHeartBeatMessage(String request) {
+        
+        System.out.println("Server Thread:checking for HeartBeat" + request);
+        return request.contains("HEARTBEAT");
+    }
+    
+    public boolean checkForLeaveResponseMessage(String request) {
+        
+        System.out.println("Server Thread:checking for LeaveOk" + request);
+        return request.contains("LEAVEOK");
+    }
+    
 }

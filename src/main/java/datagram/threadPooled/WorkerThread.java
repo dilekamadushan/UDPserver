@@ -19,6 +19,7 @@ public class WorkerThread implements Runnable {
     private DatagramPacket threadDatagramPacket = null;
     
     private DatagramSocket threadDatagramSocket = null;
+    
     private ArrayList<Node> nodes;
     
     public WorkerThread(DatagramPacket datagramPacket, DatagramSocket socket, ArrayList<Node> nodes) {
@@ -56,7 +57,7 @@ public class WorkerThread implements Runnable {
         String received = new String(threadDatagramPacket.getData(), 0, threadDatagramPacket.getLength());
         System.out.println("in server received " + received);
         
-        for(Node node:nodes){
+        for (Node node : nodes) {
             try {
                 sendJoin(node);
             }
@@ -71,10 +72,12 @@ public class WorkerThread implements Runnable {
         }
         dataBuffer = new byte[256];
     }
+    
     public void sendJoin(Node node) throws IOException {
-        System.out.println("Trying to send join message for node"+node.toString()+" "+node.getIp().toString());
+        System.out.println("Trying to send join message for node" + node.toString() + " " + node.getIp().toString());
         byte[] bufToSend = "0022 JOIN 0.0.0.0 1234".getBytes();
-        DatagramPacket nodeDatagramPacket = new DatagramPacket(bufToSend, bufToSend.length, InetAddress.getByAddress(node.getIp()),node.getPort());
+        DatagramPacket nodeDatagramPacket = new DatagramPacket(bufToSend, bufToSend.length,
+                InetAddress.getByAddress(node.getIp()), node.getPort());
         threadDatagramSocket.send(nodeDatagramPacket);
     }
 }

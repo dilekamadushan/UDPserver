@@ -16,11 +16,11 @@ public class Node {
     
     private String nodeName;
     
-    private int idForDisplay;
+    private int idForDisplay=0;
     
     private int port;
     
-    private boolean status = true;
+    private boolean status = false;
     
     private boolean isJoined = false;
     
@@ -37,10 +37,11 @@ public class Node {
         
     }
     
-    public Node(byte[] ip, int port ,String  nodeName) {
+    public Node(byte[] ip, int port ,String  nodeName,UUID systemUsername) {
         this.ip = ip;
         this.nodeName = nodeName;
         this.port = port;
+        this.systemUsername = systemUsername;
         
     }
     
@@ -86,6 +87,12 @@ public class Node {
         this.retries += 1;
     }
     
+    public void decreaseRetries() {
+        if(this.retries>0){
+            this.retries -= 1;
+        }
+    }
+    
     public byte[] getIp() {
         return ip;
     }
@@ -106,7 +113,7 @@ public class Node {
     @Override
     public String toString() {
         
-        return "ip " + new String(ip) + " port:" + this.getPort() + " systemUsername: " + this.getSystemUsername().toString()+" isJoined:"+isJoined()+" status:"+status;
+        return "ip:" + getIpString() + " port:" + this.getPort() + " nodeName:"+getNodeName()+" "+ systemUsername+" "+ this.getSystemUsername().toString()+" isJoined"+isJoined()+"  status:"+status +" retries:"+retries;
     }
     
     public boolean isJoined() {
@@ -128,4 +135,6 @@ public class Node {
     public void setSearchQueries(ArrayList<String> searchQueries) {
         this.searchQueries = searchQueries;
     }
+    
+   
 }

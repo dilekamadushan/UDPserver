@@ -54,7 +54,7 @@ public class RegisterAndJoinMessenger {
     
     public boolean start() throws IOException {
         System.out.println("Register and Join Messenger:Started");
-        boolean isRegistered = Register(BSIP, BSPort, "REG " + myNode.getIpString() + " " + myNode.getPort() + " " +myNode.getNodeName()+myNode.getIdForDisplay());
+        boolean isRegistered = Register(BSIP, BSPort, "REG " + myNode.getIpString() + " " + myNode.getPort() + " " +myNode.getNodeName());
         
         if (isRegistered) {
             System.out.println("Register and Join Messenger:Bootstrap Server Successfully Registered");
@@ -124,10 +124,9 @@ public class RegisterAndJoinMessenger {
                     
                     Node node = new Node(new byte[] { (byte) Integer.parseInt(ips[0]), (byte) Integer.parseInt(ips[1]),
                             (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) },
-                            Integer.parseInt(hostList[i + 1]),hostList[i+2].substring(0,hostList[i+2].length()-1));
+                            Integer.parseInt(hostList[i + 1]),hostList[i+2],UUID.randomUUID());
                     node.setIpString(hostList[i]);
-                    node.setIdForDisplay(Integer.parseInt(hostList[i+2].substring(hostList[i+2].length()-1)));
-                    
+                    node.setIdForDisplay(Integer.parseInt(hostList[i+1].substring(hostList[i+1].length()-1)));
                     toJoinNodes.add(node);
                     routingTable.add(node);
                     System.out.println("Register and Join Messenger: added new node" + node.toString());
