@@ -9,12 +9,13 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by dileka on 9/27/18.
  */
-public class JoinRequestAcceptor implements Runnable {
+public class JoinRequestAcceptor extends Thread {
     
     private DatagramSocket threadDatagramSocket = null;
     
@@ -51,33 +52,35 @@ public class JoinRequestAcceptor implements Runnable {
             e.printStackTrace();
         }
         
-        Node node = routingTable.stream().filter(s -> Objects.equals(s.getIpString(), params[2])).findFirst().orElse(null);
+        Node node = routingTable.stream()
+                .filter(s -> Objects.equals(s.getIpString(), params[2]) && s.getPort() == Integer.parseInt(params[3]))
+                .findFirst().orElse(null);
         if (node != null) {
             node.setStatus(true);
             node.setJoined(true);
             System.out.println("JoinRequestAcceptor:previous node was joined ");
-        } else {
+        } else if (!(myNode.getIpString().equals(params[2]) && myNode.getPort() == Integer.parseInt(params[3]))) {
             System.out.println("JoinRequestAcceptor:The node who sent message: " + request + " is not in the routing table");
             String[] ips = params[2].replace(".", " ").split(" ");
             node = new Node(new byte[] { (byte) Integer.parseInt(ips[0]), (byte) Integer.parseInt(ips[1]),
-                    (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, "FromJoinMessage",
-                    Integer.parseInt(params[3]));
+                    (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, Integer.parseInt(params[3]),
+                    "FromJoinMessage", UUID.randomUUID());
             node.setIpString(params[2]);
-            node.setJoined(true);
             node.setStatus(true);
+            node.setIdForDisplay(Integer.parseInt(params[3].substring(params[3].length() - 1)));
             routingTable.add(node);
             System.out.println("JoinRequestAcceptor:The node" + node.getIpString() + " " + node.getPort()
                     + " is added in the routing table");
             
         }
+        System.out.println("JoinRequestAcceptor:Trying to print the table");
         for (Node peer : routingTable) {
-            peer.toString();
-            
+            System.out.println(peer.toString());
         }
         
     }
     
-    public void sendJOINResponse(String ip, String port) throws IOException {
+    private void sendJOINResponse(String ip, String port) throws IOException {
         
         System.out.println("JoinRequestAcceptor:Trying to send join response for node" + ip + " " + port);
         String messge = getMessageLength("JOINOK 0");
@@ -89,7 +92,7 @@ public class JoinRequestAcceptor implements Runnable {
         
     }
     
-    public String getMessageLength(String message) {
+    private String getMessageLength(String message) {
         int size = message.length() + 5;
         if (size < 100) {
             return "00" + size + " " + message;

@@ -1,6 +1,7 @@
 package datagram.threadPooled.domain;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * Created by dileka on 10/2/18.
@@ -11,7 +12,11 @@ public class Node {
     
     private String ipString;
     
+    private UUID systemUsername;
+    
     private String nodeName;
+    
+    private int idForDisplay=0;
     
     private int port;
     
@@ -32,11 +37,36 @@ public class Node {
         
     }
     
-    public Node(byte[] ip, String nodeName, int port) {
+    public Node(byte[] ip, int port ,String  nodeName,UUID systemUsername) {
         this.ip = ip;
         this.nodeName = nodeName;
         this.port = port;
+        this.systemUsername = systemUsername;
         
+    }
+    
+    public String getNodeName() {
+        return nodeName;
+    }
+    
+    public void setNodeName(String nodeName) {
+        this.nodeName = nodeName;
+    }
+    
+    public void setSystemUsername(UUID systemUsername) {
+        this.systemUsername = systemUsername;
+    }
+    
+    public void setIdForDisplay(int idForDisplay) {
+        this.idForDisplay = idForDisplay;
+    }
+    
+    public UUID getSystemUsername() {
+        return systemUsername;
+    }
+    
+    public int getIdForDisplay() {
+        return idForDisplay;
     }
     
     public boolean isStatus() {
@@ -53,8 +83,14 @@ public class Node {
         return retries;
     }
     
-    public void setRetries(int retries) {
+    public void increaseRetries() {
         this.retries += 1;
+    }
+    
+    public void decreaseRetries() {
+        if(this.retries>0){
+            this.retries -= 1;
+        }
     }
     
     public byte[] getIp() {
@@ -65,13 +101,6 @@ public class Node {
         this.ip = ip;
     }
     
-    public String getNodeName() {
-        return nodeName;
-    }
-    
-    public void setNodeName(String nodeName) {
-        this.nodeName = nodeName;
-    }
     
     public int getPort() {
         return port;
@@ -84,7 +113,7 @@ public class Node {
     @Override
     public String toString() {
         
-        return "ip " + new String(ip) + " port:" + this.getPort() + " username: " + this.getNodeName();
+        return "ip:" + getIpString() + " port:" + this.getPort() + " nodeName:"+getNodeName()+" "+ systemUsername+" "+ this.getSystemUsername().toString()+" isJoined"+isJoined()+"  status:"+status +" retries:"+retries;
     }
     
     public boolean isJoined() {
@@ -106,4 +135,6 @@ public class Node {
     public void setSearchQueries(ArrayList<String> searchQueries) {
         this.searchQueries = searchQueries;
     }
+    
+   
 }

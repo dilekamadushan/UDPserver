@@ -2,6 +2,7 @@ package datagram.threadPooled.workerThread;
 
 import datagram.threadPooled.domain.Node;
 
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -13,11 +14,14 @@ public class GossipAcceptor extends Thread {
     
     private String gossipMessage;
     
+    private Node myNode;
+    
     public GossipAcceptor(CopyOnWriteArrayList<Node> routingTable, Node myNode, String gossipMessage) {
         
         this.routingTable = routingTable;
         this.gossipMessage = gossipMessage;
-        System.out.println("Gossip Acceptor: Thread started");
+        this.myNode = myNode;
+        System.out.println("Gossip Acceptor: Thread started:" + gossipMessage);
     }
     
     public void run() {
@@ -25,27 +29,43 @@ public class GossipAcceptor extends Thread {
         addToRoutingTable(gossipMessage);
     }
     
-    public void addToRoutingTable(String gossipMessage) {
+    private void addToRoutingTable(String gossipMessage) {
         System.out.println("Gossip Acceptor: Trying to decode gossip message " + gossipMessage);
-        String[] hostList = gossipMessage.split(" ");
-        
-        for (int i = 2; i < hostList.length; i += 3) {
+        String[] hostList = gossipMessage.substring(12).split(" ");
+        for (int i = 0; i < hostList.length; i += 3) {
             
             System.out.println(
-                    "Gossip Acceptor:" + hostList[i] + " " + hostList[i + 1] + " " + hostList[i
+                    "Gossip Acceptor:Inside the addTable method :" + hostList[i] + " " + hostList[i + 1] + " " + hostList[i
                             + 2]);
             String[] ips = hostList[i].replace(".", " ").split(" ");
             System.out.println(
-                    "Gossip Acceptor:" + Integer.parseInt(ips[0]) + " " + Integer.parseInt(ips[1]) + " "
+                    "Register and Join Messenger:" + Integer.parseInt(ips[0]) + " " + Integer.parseInt(ips[1]) + " "
                             + Integer.parseInt(ips[2]) + " " + Integer.parseInt(ips[3]));
+            
             Node node = new Node(new byte[] { (byte) Integer.parseInt(ips[0]), (byte) Integer.parseInt(ips[1]),
-                    (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, hostList[i + 2],
-                    Integer.parseInt(hostList[i + 1]));
+                    (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, Integer.parseInt(hostList[i + 1]),
+                    hostList[i + 2], UUID.randomUUID());
             node.setIpString(hostList[i]);
-            //routingTable.add(node);
-            System.out.println("Gossip AcceptorGossip Acceptor: added new node");
+            node.setIdForDisplay(Integer.parseInt(hostList[i + 1].substring(hostList[i + 1].length() - 1)));
+            
+            Node member = routingTable.stream()
+                    .filter(s -> s.getIpString().equals(node.getIpString()) && s.getPort() == node.getPort()).findFirst()
+                    .orElse(null);
+            
+            if (member == null && !(node.getIpString().equals(myNode.getIpString()) && node.getPort() == myNode.getPort())) {
+                node.setStatus(true);
+                routingTable.add(node);
+                System.out.println("Gossip Acceptor: A new node created:" + node.toString());
+            } else if (member != null) {
+                //member.setJoined(true);
+                member.setStatus(true);
+            }
+        }
+        System.out.println("Gossip Acceptor: Printing the routing table");
+        for (Node peer : routingTable) {
+            System.out.println("Gossip Acceptor: " + peer.toString());
+            
         }
         
     }
 }
-
