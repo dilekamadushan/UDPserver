@@ -1,5 +1,9 @@
 lsFiles
-lsNodes
+lsNodesJoined
 lsSearchResult
 lsSearchResponses
-search spider man
+search man
+lsNodesFound
+lsNodesSpecial
+lsSearchRequests
+

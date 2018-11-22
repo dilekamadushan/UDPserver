@@ -11,6 +11,7 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -136,12 +137,20 @@ public class SearchRequestAcceptor implements Runnable {
                 }
                 System.out.println(packetCount + "SearchRequestAcceptor:Finished dealing with filenames");
                 if (8 > Integer.parseInt(params[params.length - 1])) {
+                    Random random = new Random();
                     System.out.println(packetCount + "SearchRequestAcceptor:Trying to send search request for other nodes");
                     for (Node node : routingTable) {
                         try {
                             if (!Objects.equals(node.getIpString(), params[2])) {
-                                sendSearchRequest(node, Integer.parseInt(params[params.length - 1]) + 1, params[2],
-                                        params[3], searchRequest.toString());
+                                if(node.isJoined()){
+                                    sendSearchRequest(node, Integer.parseInt(params[params.length - 1]) + 1, params[2],
+                                            params[3], searchRequest.toString());
+                                }
+                                else {
+                                    sendSearchRequest(node, Integer.parseInt(params[params.length - 1]) +random.nextInt(3) , params[2],
+                                            params[3], searchRequest.toString());
+                                }
+                               
                                 System.out.println(
                                         packetCount + "SearchRequestAcceptor: sent the search request" + node.toString()
                                                 + " " + params[2] + " " + params[3]);
@@ -224,8 +233,17 @@ public class SearchRequestAcceptor implements Runnable {
                     
                     node.setIdForDisplay(Integer.parseInt(params[3].substring(params[3].length() - 1)));
                     node.setStatus(true);
+                    node.setDiscoveredBy("From search response "+request);
+                    routingTable.add(node);
                     routingTable.add(node);
                     System.out.println(packetCount + "SearchRequestAcceptor: added a new node to table" + node.toString());
+                }
+                else if (newNode != null) {
+                    //newNode.setJoined(true);
+                    newNode.setStatus(true);
+                    if (Objects.equals(node.getDiscoveredBy(), "")) {
+                        node.setDiscoveredBy("From search request " + request);
+                    }
                 }
             }
             

@@ -40,6 +40,8 @@ public class RegisterAndJoinMessenger {
     
     private Node myNode;
     
+    public int registeredIndex;
+    
     public RegisterAndJoinMessenger(String BSIP, int BSPort, Node myNode, DatagramSocket socket,
             ArrayList<Node> toJoinNodes, ArrayList<Node> triedToJoinNodes, CopyOnWriteArrayList<Node> routingTable) {
         
@@ -110,7 +112,9 @@ public class RegisterAndJoinMessenger {
                 
                 System.out.println(
                         "Register and Join Messenger:last host string " + hostList + " " + hostList.length);
+                registeredIndex = (hostList.length/3);
                 for (int i = 0; i < hostList.length; i += 3) {
+                //for (int i = 0; i < 6; i += 3) {
                     
                     System.out.println(
                             "Register and Join Messenger:Inside the loop:" + hostList[i] + " " + hostList[i + 1] + " "
@@ -172,7 +176,6 @@ public class RegisterAndJoinMessenger {
                     + toJoinNodes.size());
             ArrayList<Node> nodes = toJoinNodes;
             for (Node node : nodes) {
-                //toJoinNodes.remove(node);
                 triedToJoinNodes.add(node);
                 try {
                     System.out.println(
@@ -217,16 +220,10 @@ public class RegisterAndJoinMessenger {
                 catch (UnknownHostException e) {
                     System.out.println("Register and Join Messenger:Node unreachable");
                     e.printStackTrace();
-                    if (toJoinNodes.size() < (2 - i)) {
-                        return false;
-                    }
                 }
                 catch (IOException e) {
                     e.printStackTrace();
                     System.out.println("Register and Join Messenger:Error in socket");
-                    if (toJoinNodes.size() < (2 - i)) {
-                        return false;
-                    }
                 }
             }
             System.out.println("Register and Join Messenger:Successfully sent the Join Message to 2 nodes");

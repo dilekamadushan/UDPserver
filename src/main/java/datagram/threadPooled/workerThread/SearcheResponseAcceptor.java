@@ -42,7 +42,7 @@ public class SearcheResponseAcceptor extends Thread {
         String[] params = searchResponse.split(" ");
         
         String previousSearchResponse = previousSearchResponses.stream()
-                .filter(s -> s.contains(params[2]) && s.contains(params[4]) && s.contains(params[3])).findFirst()
+                .filter(s -> s.contains(params[2]) && s.contains(params[3]) && s.contains(params[4])).findFirst()
                 .orElse(null);
         if (previousSearchResponse == null) {
             System.out.println(packetCount + "Search Response Acceptor:no previous search request " +System.currentTimeMillis()+ searchResponse);
@@ -93,11 +93,15 @@ public class SearcheResponseAcceptor extends Thread {
                     .getPort())) {
                 System.out.println(packetCount + "Search Response Acceptor:Found new node ");
                 node.setStatus(true);
+                node.setDiscoveredBy("From search response "+searchResponse);
                 routingTable.add(node);
                 System.out.println(packetCount + "Search Response Acceptor:Added node " + node.toString());
             } else if (newNode != null) {
                 //newNode.setJoined(true);
                 newNode.setStatus(true);
+                if(Objects.equals(node.getDiscoveredBy(), "")){
+                    node.setDiscoveredBy("From search response "+searchResponse);
+                }
             }
             previousSearchResponses.add(searchResponse);
             System.out.println(packetCount + "SearchResponseAcceptor: added search response to cache" +System.currentTimeMillis()+ searchResponse);

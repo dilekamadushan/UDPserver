@@ -1,14 +1,17 @@
 package datagram.threadPooled.workerThread;
 
 import datagram.threadPooled.domain.Node;
+import datagram.threadPooled.domain.RegisterAndJoinMessenger;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 /**
  * Created by dileka on 9/27/18.
@@ -27,22 +30,31 @@ public class HeartBeatSender extends Thread {
     
     private int BSPort;
     
-    public HeartBeatSender(DatagramSocket socket, Node myNode, String BSIP, int BSPort,
-            CopyOnWriteArrayList<Node> routingTable) {
+    private boolean running;
+    
+    private RegisterAndJoinMessenger registerAndJoinMessenger;
+    
+    public HeartBeatSender(boolean running, RegisterAndJoinMessenger registerAndJoinMessenger, DatagramSocket socket,
+            Node myNode, String BSIP, int BSPort, CopyOnWriteArrayList<Node> routingTable) {
         this.myNode = myNode;
         this.threadDatagramSocket = socket;
         this.routingTable = routingTable;
         this.BSIP = BSIP;
         this.BSPort = BSPort;
+        this.running = running;
+        this.registerAndJoinMessenger = registerAndJoinMessenger;
         System.out.println("Heart-Beat Sender: Thread started");
     }
     
     public void run() {
         System.out.println("Heart-Beat Sender:Entering the Heart-Beat sending loop");
-        while (true) {
-            if (routingTable.size() > 0) {
+        long start = System.currentTimeMillis();
+        while (running) {
+            List<Node> joinedNodes = routingTable.stream().filter(Node::isJoined).collect(Collectors.toList());
+            if (registerAndJoinMessenger.registeredIndex < 2 || joinedNodes.size() > 1) {
                 try {
-                    System.out.println("HeartBeat Sender:HeartBeat thread sleep for 120 seconds ");
+                    System.out.println("HeartBeat Sender:HeartBeat thread sleep for 120 seconds:"
+                            + registerAndJoinMessenger.registeredIndex);
                     Thread.sleep(1000 * 60 * 2);
                 }
                 catch (InterruptedException e) {
@@ -76,9 +88,21 @@ public class HeartBeatSender extends Thread {
                         System.out.println("HeartBeat Sender:HeartBeat message failed to " + node.toString());
                     }
                 }
+                System.out.println("HeartBeat Sender::" + registerAndJoinMessenger.registeredIndex);
                 
-            } else {
+            } else if (registerAndJoinMessenger.registeredIndex > 1 && (((start - System.currentTimeMillis()) / (1000))
+                    > 60)) {
                 // System.out.println("HeartBeat Sender:Routing table size is 0"+routingTable.size());
+                System.out.println("HeartBeat Sender:Server failed  to  join with two nodes, retrying");
+                try {
+                    registerAndJoinMessenger.sendJoin();
+                    
+                    start = System.currentTimeMillis();
+                    System.out.println("HeartBeat Sender:Server resent join  messages");
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
             
         }

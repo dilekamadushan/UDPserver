@@ -66,9 +66,9 @@ public class KafkaProducer extends Thread {
     
     private void produce() {
     
-        for (Node aRoutingTable : routingTable) {
-            if (aRoutingTable.isStatus()) {
-                String edge = "" + myNode.getIdForDisplay() + aRoutingTable.getIdForDisplay();
+        for (Node node : routingTable) {
+            if (node.isStatus()) {
+                String edge = "" + myNode.getIdForDisplay() + node.getIdForDisplay();
             
                 // Send the sentence to the test topic
                 ProducerRecord<String, String> data = new ProducerRecord<>(topic, edge);

@@ -16,7 +16,7 @@ public class Node {
     
     private String nodeName;
     
-    private int idForDisplay=0;
+    private int idForDisplay = 0;
     
     private int port;
     
@@ -24,9 +24,19 @@ public class Node {
     
     private boolean isJoined = false;
     
+    private String discoveredBy = "";
+    
     private int retries = 0;
     
     private ArrayList<String> searchQueries = new ArrayList<>();
+    
+    public Node(byte[] ip, int port, String nodeName, UUID systemUsername) {
+        this.ip = ip;
+        this.nodeName = nodeName;
+        this.port = port;
+        this.systemUsername = systemUsername;
+        
+    }
     
     public void addSearchQuery(String searchQuery) {
         this.searchQueries.add(searchQuery);
@@ -37,12 +47,8 @@ public class Node {
         
     }
     
-    public Node(byte[] ip, int port ,String  nodeName,UUID systemUsername) {
-        this.ip = ip;
-        this.nodeName = nodeName;
-        this.port = port;
-        this.systemUsername = systemUsername;
-        
+    public void setSearchQueries(ArrayList<String> searchQueries) {
+        this.searchQueries = searchQueries;
     }
     
     public String getNodeName() {
@@ -53,20 +59,20 @@ public class Node {
         this.nodeName = nodeName;
     }
     
-    public void setSystemUsername(UUID systemUsername) {
-        this.systemUsername = systemUsername;
-    }
-    
-    public void setIdForDisplay(int idForDisplay) {
-        this.idForDisplay = idForDisplay;
-    }
-    
     public UUID getSystemUsername() {
         return systemUsername;
     }
     
+    public void setSystemUsername(UUID systemUsername) {
+        this.systemUsername = systemUsername;
+    }
+    
     public int getIdForDisplay() {
         return idForDisplay;
+    }
+    
+    public void setIdForDisplay(int idForDisplay) {
+        this.idForDisplay = idForDisplay;
     }
     
     public boolean isStatus() {
@@ -88,7 +94,7 @@ public class Node {
     }
     
     public void decreaseRetries() {
-        if(this.retries>0){
+        if (this.retries > 0) {
             this.retries -= 1;
         }
     }
@@ -101,7 +107,6 @@ public class Node {
         this.ip = ip;
     }
     
-    
     public int getPort() {
         return port;
     }
@@ -113,7 +118,9 @@ public class Node {
     @Override
     public String toString() {
         
-        return "ip:" + getIpString() + " port:" + this.getPort() + " nodeName:"+getNodeName()+" "+ systemUsername+" "+ this.getSystemUsername().toString()+" isJoined"+isJoined()+"  status:"+status +" retries:"+retries;
+        return "ip:" + getIpString() + " port:" + this.getPort() + " nodeName:" + getNodeName() + " " + systemUsername + ":"
+                + this.getSystemUsername().toString() + " isJoined:" + isJoined() + "  status:" + status + " retries:"
+                + retries + " discovered by:" + discoveredBy;
     }
     
     public boolean isJoined() {
@@ -122,19 +129,23 @@ public class Node {
     
     public void setJoined(boolean joined) {
         isJoined = joined;
-    }
-    
-    public void setIpString(String ipString) {
-        this.ipString = ipString;
+        status = true;
+        setDiscoveredBy("From Joined Message");
     }
     
     public String getIpString() {
         return ipString;
     }
     
-    public void setSearchQueries(ArrayList<String> searchQueries) {
-        this.searchQueries = searchQueries;
+    public void setIpString(String ipString) {
+        this.ipString = ipString;
     }
     
-   
+    public String getDiscoveredBy() {
+        return discoveredBy;
+    }
+    
+    public void setDiscoveredBy(String discoveredBy) {
+        this.discoveredBy = discoveredBy;
+    }
 }

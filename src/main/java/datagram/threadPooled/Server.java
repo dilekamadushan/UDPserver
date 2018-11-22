@@ -127,7 +127,7 @@ public class Server extends Thread {
             kafkaProducer.start();
             System.out.println("Server Thread: Kafka producer started");
             
-            HeartBeatSender heartBeatSender = new HeartBeatSender(UDPsocket, myNode, BSIP, BSPort, routingTable);
+            HeartBeatSender heartBeatSender = new HeartBeatSender(running, registerAndJoinMessenger,UDPsocket, myNode, BSIP, BSPort, routingTable);
             heartBeatSender.start();
             System.out.println("Server Thread: Heart Beat Sender started");
             kafkaLogger = new KafkaLogger(running);

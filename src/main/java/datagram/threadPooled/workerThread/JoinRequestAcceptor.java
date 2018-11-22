@@ -57,7 +57,6 @@ public class JoinRequestAcceptor extends Thread {
                 .findFirst().orElse(null);
         if (node != null) {
             node.setStatus(true);
-            node.setJoined(true);
             System.out.println("JoinRequestAcceptor:previous node was joined ");
         } else if (!(myNode.getIpString().equals(params[2]) && myNode.getPort() == Integer.parseInt(params[3]))) {
             System.out.println("JoinRequestAcceptor:The node who sent message: " + request + " is not in the routing table");
@@ -68,6 +67,7 @@ public class JoinRequestAcceptor extends Thread {
             node.setIpString(params[2]);
             node.setStatus(true);
             node.setIdForDisplay(Integer.parseInt(params[3].substring(params[3].length() - 1)));
+            node.setDiscoveredBy("From Join Request"+request);
             routingTable.add(node);
             System.out.println("JoinRequestAcceptor:The node" + node.getIpString() + " " + node.getPort()
                     + " is added in the routing table");

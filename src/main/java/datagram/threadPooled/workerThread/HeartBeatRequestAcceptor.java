@@ -34,6 +34,9 @@ public class HeartBeatRequestAcceptor extends Thread {
                 .findFirst().orElse(null);
         if (node != null) {
             node.decreaseRetries();
+            if (Objects.equals(node.getDiscoveredBy(), "")) {
+                node.setDiscoveredBy("From Heart Beat" + request);
+            }
             System.out.println("HeartBeatRequestAcceptor:heart beat message processed " + node.toString());
         } else if (!(Objects.equals(myNode.getIpString(), params[2]) && myNode.getPort() == Integer.parseInt(params[3]))) {
             System.out.println(
@@ -45,6 +48,7 @@ public class HeartBeatRequestAcceptor extends Thread {
             node.setIpString(params[2]);
             node.setIdForDisplay(Integer.parseInt(params[3].substring(params[3].length() - 1)));
             node.setStatus(true);
+            node.setDiscoveredBy("From Heart Beat");
             routingTable.add(node);
             System.out.println("HeartBeatRequestAcceptor:The node" + node.getIpString() + " " + node.getPort()
                     + " is added in the routing table");

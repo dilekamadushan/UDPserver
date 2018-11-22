@@ -75,7 +75,7 @@ public class CommandAcceptor extends Thread {
             System.out.println("Search Query Acceptor :Enter a search query: ");
             String query = reader.nextLine(); // Scans the next token of the input as a string.
             switch (query) {
-                case "lsNodes":
+                case "lsNodesJoined":
                     System.out.println("Search Query Acceptor :The nodes in the routing table are:");
                     routingTable.forEach(n -> {
                         if (n.isJoined()) {
@@ -84,10 +84,14 @@ public class CommandAcceptor extends Thread {
                     });
                     
                     break;
-                case "lsNodesAll":
+                case "lsNodesFound":
                     System.out.println("Search Query Acceptor :The nodes in the routing table are:");
-                    routingTable.forEach(n -> System.out.println(n.toString()));
-                    
+                    routingTable.forEach(n -> {
+                        if (n.isStatus()) {
+                            System.out.println(n.toString());
+                        }
+                    });
+        
                     break;
                 case "lsFiles":
                     System.out.println("Search Query Acceptor :The files in this node are:");
@@ -123,6 +127,11 @@ public class CommandAcceptor extends Thread {
                         e.printStackTrace();
                         System.out.println("Search Query Acceptor :The system is trying to leave the system ");
                     }
+                    break;
+                case "lsNodesSpecial":
+                    System.out.println("Search Query Acceptor :The nodes in the routing table are:");
+                    routingTable.forEach(n -> System.out.println(n.toString()));
+        
                     break;
                 default:
                     if (query.length() > 7 && "search".equals(query.substring(0, 6))) {
