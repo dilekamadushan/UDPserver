@@ -14,6 +14,7 @@ import datagram.threadPooled.workerThread.KafkaLogger;
 import datagram.threadPooled.workerThread.KafkaProducer;
 import datagram.threadPooled.workerThread.SearchRequestAcceptor;
 import datagram.threadPooled.workerThread.SearcheResponseAcceptor;
+import datagram.threadPooled.workerThread.WebUpdater;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,6 +79,8 @@ public class Server extends Thread {
     
     private KafkaLogger kafkaLogger;
     
+    private WebUpdater webUpdater;
+    
     private int myIdForDisplay;
     
     
@@ -131,6 +134,10 @@ public class Server extends Thread {
             heartBeatSender.start();
             System.out.println("Server Thread: Heart Beat Sender started");
             kafkaLogger = new KafkaLogger(running);
+    
+            System.out.println("Server Thread: Kafka logger started");
+            webUpdater = new WebUpdater(running,myNode,BSIP,BSPort,searchResult);
+            System.out.println("Server Thread: Web Updater started");
         }
         catch (ConnectException ce) {
             System.out.println("Server Thread:Bootstrap server unreachable");
