@@ -1,1 +1,5 @@
 lsFiles
+lsNodes
+lsSearchResult
+lsSearchResponses
+search spider man
