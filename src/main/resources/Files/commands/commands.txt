@@ -1,6 +1,0 @@
-lsFiles
-lsNodes
-lsSearchRequests
-lsSearchResponses
-lsSearchResult
-resetSearchResult
