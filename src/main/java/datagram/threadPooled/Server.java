@@ -136,7 +136,7 @@ public class Server extends Thread {
             kafkaLogger = new KafkaLogger(running);
     
             System.out.println("Server Thread: Kafka logger started");
-            webUpdater = new WebUpdater(running,myNode,BSIP,BSPort,searchResult);
+           // webUpdater = new WebUpdater(running,myNode,BSIP,BSPort,searchResult);
             System.out.println("Server Thread: Web Updater started");
         }
         catch (ConnectException ce) {
@@ -272,14 +272,24 @@ public class Server extends Thread {
         
         try (Scanner scanner = new Scanner(file)) {
             
-            while (scanner.hasNextLine()) {
+            while (result.size()<5) {
                 String line = scanner.nextLine();
                 int random = new Random().nextInt(100);
                 System.out.println(random);
                 if (random % 2 == 1) {
-                    //String[] words = line.split(" ");
+                    String[] words = line.split(" ");
+                    StringBuilder stringBuilder = new StringBuilder();
+                    
+                    for(int i=0;i<words.length;i++){
+                        if(i!=words.length-1){
+                            stringBuilder.append(words[i]).append("_");
+                        }
+                        else {
+                            stringBuilder.append(words[i]);
+                        }
+                    }
                     //Collections.addAll(result, line);
-                    result.add(line);
+                    result.add(stringBuilder.toString());
                 }
             }
             scanner.close();
