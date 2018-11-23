@@ -273,6 +273,7 @@ public class Server extends Thread {
     }
 
     public void submitSearchRequest(String keyword) {
+        searchResult.reset();
         commandAcceptor.submitSearchRequest(keyword);
     }
 
