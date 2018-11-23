@@ -1,6 +1,6 @@
-package datagram.threadPooled.workerThread;
+package com.grydtech.peershare.datagram.workerThread;
 
-import datagram.threadPooled.domain.Node;
+import com.grydtech.peershare.datagram.domain.Node;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;

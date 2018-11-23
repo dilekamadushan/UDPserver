@@ -1,7 +1,6 @@
-package datagram.threadPooled.domain;
+package com.grydtech.peershare.datagram.domain;
 
 import java.util.ArrayList;
-import java.util.Timer;
 
 /**
  * Created by dileka on 10/2/18.

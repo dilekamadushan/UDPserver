@@ -1,4 +1,4 @@
-package datagram.threadPooled.domain;
+package com.grydtech.peershare.datagram.domain;
 
 import java.util.ArrayList;
 import java.util.UUID;

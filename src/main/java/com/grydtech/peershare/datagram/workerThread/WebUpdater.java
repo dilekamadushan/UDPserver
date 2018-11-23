@@ -1,7 +1,7 @@
-package datagram.threadPooled.workerThread;
+package com.grydtech.peershare.datagram.workerThread;
 
-import datagram.threadPooled.domain.Node;
-import datagram.threadPooled.domain.SearchResult;
+import com.grydtech.peershare.datagram.domain.Node;
+import com.grydtech.peershare.datagram.domain.SearchResult;
 
 import java.net.DatagramSocket;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -14,21 +14,12 @@ public class WebUpdater extends Thread {
     private DatagramSocket threadDatagramSocket = null;
     
     private CopyOnWriteArrayList<Node> routingTable;
-    
-    private Node myNode;
-    
-    private String BSIP;
-    
-    private int BSPort;
-    
+
     private boolean running;
     
     private SearchResult searchResult;
     
-    public WebUpdater(boolean running, Node myNode, String BSIP, int BSPort, SearchResult searchResult) {
-        this.myNode = myNode;
-        this.BSIP = BSIP;
-        this.BSPort = BSPort;
+    public WebUpdater(boolean running, SearchResult searchResult) {
         this.running = running;
         this.searchResult = searchResult;
         System.out.println("Web Updater: Thread started");
@@ -51,6 +42,6 @@ public class WebUpdater extends Thread {
     
     //To implement
     void sendDataToWeb() {
-        
+
     }
 }

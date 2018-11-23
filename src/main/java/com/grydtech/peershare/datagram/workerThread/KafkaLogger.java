@@ -1,6 +1,5 @@
-package datagram.threadPooled.workerThread;
+package com.grydtech.peershare.datagram.workerThread;
 
-import datagram.threadPooled.domain.Node;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -11,7 +10,6 @@ import org.json.JSONObject;
 
 import java.util.Collection;
 import java.util.Properties;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class KafkaLogger {
     

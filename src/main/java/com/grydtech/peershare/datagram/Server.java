@@ -1,20 +1,21 @@
-package datagram.threadPooled;
+package com.grydtech.peershare.datagram;
 
-import datagram.threadPooled.domain.Node;
-import datagram.threadPooled.domain.RegisterAndJoinMessenger;
-import datagram.threadPooled.domain.SearchResult;
-import datagram.threadPooled.workerThread.CommandAcceptor;
-import datagram.threadPooled.workerThread.GossipAcceptor;
-import datagram.threadPooled.workerThread.GossipSender;
-import datagram.threadPooled.workerThread.HeartBeatRequestAcceptor;
-import datagram.threadPooled.workerThread.HeartBeatSender;
-import datagram.threadPooled.workerThread.JoinRequestAcceptor;
-import datagram.threadPooled.workerThread.JoinResponseAcceptor;
-import datagram.threadPooled.workerThread.KafkaLogger;
-import datagram.threadPooled.workerThread.KafkaProducer;
-import datagram.threadPooled.workerThread.SearchRequestAcceptor;
-import datagram.threadPooled.workerThread.SearcheResponseAcceptor;
-import datagram.threadPooled.workerThread.WebUpdater;
+import com.grydtech.peershare.datagram.domain.Node;
+import com.grydtech.peershare.datagram.domain.RegisterAndJoinMessenger;
+import com.grydtech.peershare.datagram.domain.SearchResult;
+import com.grydtech.peershare.datagram.workerThread.CommandAcceptor;
+import com.grydtech.peershare.datagram.workerThread.GossipAcceptor;
+import com.grydtech.peershare.datagram.workerThread.GossipSender;
+import com.grydtech.peershare.datagram.workerThread.HeartBeatRequestAcceptor;
+import com.grydtech.peershare.datagram.workerThread.HeartBeatSender;
+import com.grydtech.peershare.datagram.workerThread.JoinRequestAcceptor;
+import com.grydtech.peershare.datagram.workerThread.JoinResponseAcceptor;
+import com.grydtech.peershare.datagram.workerThread.KafkaLogger;
+import com.grydtech.peershare.datagram.workerThread.KafkaProducer;
+import com.grydtech.peershare.datagram.workerThread.SearchRequestAcceptor;
+import com.grydtech.peershare.datagram.workerThread.SearcheResponseAcceptor;
+import com.grydtech.peershare.datagram.workerThread.WebUpdater;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.io.File;
 import java.io.IOException;
@@ -82,13 +83,16 @@ public class Server extends Thread {
     private WebUpdater webUpdater;
     
     private int myIdForDisplay;
+
+    private SimpMessagingTemplate simpMessagingTemplate;
     
     
-    Server(String BSIp, int BSPort, String myIP, String myPort, String nodeName) throws SocketException {
+    public Server(String BSIp, int BSPort, String myIP, int myPort, String nodeName, SimpMessagingTemplate simpMessagingTemplate) throws SocketException {
+        this.simpMessagingTemplate = simpMessagingTemplate;
         programeStartedTime = System.currentTimeMillis();
         this.myIP = myIP;
         this.BSIP = BSIp;
-        this.myPort = Integer.parseInt(myPort);
+        this.myPort = myPort;
         this.BSPort = BSPort;
         UDPsocket = new DatagramSocket(this.myPort);
         toJoinNodes = new ArrayList<>();
@@ -104,7 +108,8 @@ public class Server extends Thread {
                 (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, this.myPort, nodeName,
                 UUID.randomUUID());
         myNode.setIpString(myIP);
-        this.myIdForDisplay=Integer.parseInt(myPort.substring(myPort.length() - 1));
+        String s = String.valueOf(myPort);
+        this.myIdForDisplay=Integer.parseInt(s.substring(s.length() - 1));
         myNode.setIdForDisplay(myIdForDisplay);
         registerAndJoinMessenger = new RegisterAndJoinMessenger(BSIp, BSPort, myNode, UDPsocket, toJoinNodes,
                 triedToJoinNodes, routingTable);
@@ -136,8 +141,9 @@ public class Server extends Thread {
             kafkaLogger = new KafkaLogger(running);
     
             System.out.println("Server Thread: Kafka logger started");
-            webUpdater = new WebUpdater(running,myNode,BSIP,BSPort,searchResult);
+            webUpdater = new WebUpdater(running, searchResult);
             System.out.println("Server Thread: Web Updater started");
+            webUpdater.start();
         }
         catch (ConnectException ce) {
             System.out.println("Server Thread:Bootstrap server unreachable");
