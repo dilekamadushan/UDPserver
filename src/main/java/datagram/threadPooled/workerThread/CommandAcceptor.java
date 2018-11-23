@@ -121,7 +121,7 @@ public class CommandAcceptor extends Thread {
                 case "leave":
                     System.out.println("Search Query Acceptor :The system is trying to leave the system ");
                     try {
-                        sendLeaveMessage(BSIP, BSport);
+                        sendLEAVEAndUNREGMessage(BSIP, BSport);
                     }
                     catch (IOException e) {
                         e.printStackTrace();
@@ -131,7 +131,7 @@ public class CommandAcceptor extends Thread {
                 case "lsNodesSpecial":
                     System.out.println("Search Query Acceptor :The nodes in the routing table are:");
                     routingTable.forEach(n -> System.out.println(n.toString()));
-        
+                    
                     break;
                 default:
                     if (query.length() > 7 && "search".equals(query.substring(0, 6))) {
@@ -176,15 +176,19 @@ public class CommandAcceptor extends Thread {
         }
     }
     
-    private void sendLeaveMessage(String BSIP, Integer BSport) throws IOException {
+    private void sendLEAVEAndUNREGMessage(String BSIP, Integer BSport) throws IOException {
         System.out.println("Search Query Acceptor:inside send leave message method " + BSIP + " " + BSport);
         String msg = getFullMessage("LEAVE " + myNode.getIpString() + " " + myNode.getPort());
         byte[] bufToSend = msg.getBytes();
         System.out.println("Search Query Acceptor:Leave Message:" + msg);
-        DatagramPacket nodeDatagramPacket = new DatagramPacket(bufToSend, bufToSend.length, InetAddress.getByName(BSIP),
-                BSport);
-        datagramSocket.send(nodeDatagramPacket);
-        System.out.println("Search Query Acceptor:Leave Message sent to " + BSIP + " " + BSport + " " + msg);
+        
+        for (Node node : routingTable) {
+            DatagramPacket nodeDatagramPacket = new DatagramPacket(bufToSend, bufToSend.length,
+                    InetAddress.getByAddress(node.getIp()), node.getPort());
+            datagramSocket.send(nodeDatagramPacket);
+            System.out.println("Search Query Acceptor:Leave Message sent to " + BSIP + " " + BSport + " " + msg);
+            
+        }
         
         Socket TCPSocket = new Socket(BSIP, BSport);
         PrintWriter out = new PrintWriter(TCPSocket.getOutputStream(), true);
