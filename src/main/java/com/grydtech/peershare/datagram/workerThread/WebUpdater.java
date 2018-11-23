@@ -2,31 +2,35 @@ package com.grydtech.peershare.datagram.workerThread;
 
 import com.grydtech.peershare.datagram.domain.Node;
 import com.grydtech.peershare.datagram.domain.SearchResult;
+import com.grydtech.peershare.ui.models.FileWrapper;
+import com.grydtech.peershare.ui.models.SearchResponse;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
-import java.net.DatagramSocket;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
 
 /**
  * Created by dileka on 9/27/18.
  */
 public class WebUpdater extends Thread {
-    
-    private DatagramSocket threadDatagramSocket = null;
-    
-    private CopyOnWriteArrayList<Node> routingTable;
 
     private boolean running;
     
     private SearchResult searchResult;
+
+    private final SimpMessagingTemplate simpMessagingTemplate;
     
-    public WebUpdater(boolean running, SearchResult searchResult) {
+    public WebUpdater(boolean running, SearchResult searchResult, SimpMessagingTemplate simpMessagingTemplate) {
         this.running = running;
         this.searchResult = searchResult;
+        this.simpMessagingTemplate  = simpMessagingTemplate;
         System.out.println("Web Updater: Thread started");
     }
     
     public void run() {
-        System.out.println("Web Updater:Entering the Heart-Beat sending loop");
+        System.out.println("Web Updater: Entering data sending loop");
         
         while (running) {
             sendDataToWeb();
@@ -37,11 +41,25 @@ public class WebUpdater extends Thread {
                 e.printStackTrace();
             }
         }
-        
     }
     
     //To implement
-    void sendDataToWeb() {
+    private void sendDataToWeb() {
+        List<FileWrapper> results = new ArrayList<>();
 
+        for (int i = 0; i < searchResult.getFileNames().size(); i++) {
+            Node node = searchResult.getNodes().get(i);
+            String fileName = searchResult.getFileNames().get(i);
+            String fileId = generateBase64(fileName);
+            String fileUrl = String.format("http://%s:%d/download/%s", node.getIpString(), node.getPort(), fileId);
+
+            results.add(new FileWrapper(fileId, fileName, fileUrl));
+        }
+
+        simpMessagingTemplate.convertAndSend("/topic/results", new SearchResponse(results));
+    }
+
+    private String generateBase64(String s) {
+        return new String(Base64.getEncoder().encode(s.getBytes()), StandardCharsets.UTF_8);
     }
 }

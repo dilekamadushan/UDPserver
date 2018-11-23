@@ -31,16 +31,18 @@ public class PeerShareApplication {
     private String serverName;
 
     private final SimpMessagingTemplate simpMessagingTemplate;
+    private final Server server;
 
     @Autowired
-    public PeerShareApplication(SimpMessagingTemplate simpMessagingTemplate) {
+    public PeerShareApplication(SimpMessagingTemplate simpMessagingTemplate, Server server) {
         this.simpMessagingTemplate = simpMessagingTemplate;
+        this.server = server;
     }
 
     @EventListener
     public void afterApplicationReady(ApplicationReadyEvent event) {
         try {
-            Server server = new Server(bootstrapHost, bootstrapPort, serverHost, serverPort, serverName, simpMessagingTemplate);
+            server.initServer(bootstrapHost, bootstrapPort, serverHost, serverPort, serverName, simpMessagingTemplate);
             System.out.println("Starter: started successfully");
             server.start();
             Thread.sleep(20 * 100000);
@@ -63,6 +65,5 @@ public class PeerShareApplication {
 
     public static void main(String[] args) throws SocketException {
         SpringApplication.run(PeerShareApplication.class);
-        Starter.start(args);
     }
 }

@@ -138,21 +138,7 @@ public class CommandAcceptor extends Thread {
                         System.out.println(
                                 "Search Query Acceptor :The user has requested to search for files by name: " + query
                                         .substring(7));
-                        if (!searchResult.isInUse()) {
-                            System.out.println(
-                                    "Search Query Acceptor :finished reading line " + query + " " + query.substring(7));
-                            searchResult.setQuery(query.substring(7));
-                            searchResult.setInUse(true);
-                            executorService.execute(
-                                    new SearchRequestAcceptor(packetCount, this.datagramSocket, routingTable, fileNames,
-                                            myNode, getFullMessage(
-                                            "SER " + myNode.getIpString() + " " + myNode.getPort() + " " + query.substring(7)
-                                                    + " 0"), true, previousSearchRequests, searchResult));
-                            System.out.println("Search Query Acceptor : created a SearchRequestAcceptor thread");
-                            
-                        } else {
-                            System.out.println("Please wait until previous search ends");
-                        }
+                        submitSearchRequest(query.substring(7));
                     } else if (query.length() > 8 && "addFile".equals(query.substring(0, 7))) {
                         System.out.println("Search Query Acceptor : User requested to add a File:" + query.substring(7));
                         fileNames.add(query.substring(7));
@@ -164,7 +150,22 @@ public class CommandAcceptor extends Thread {
             
         }
         //once finished
-        
+    }
+
+    public void submitSearchRequest(String keyword) {
+        if (!searchResult.isInUse()) {
+            System.out.println("Search Query Acceptor: accepted query: " + keyword);
+            searchResult.setQuery(keyword);
+            searchResult.setInUse(true);
+            executorService.execute(
+                    new SearchRequestAcceptor(packetCount, this.datagramSocket, routingTable, fileNames,
+                            myNode, getFullMessage(
+                            "SER " + myNode.getIpString() + " " + myNode.getPort() + " " + keyword
+                                    + " 0"), true, previousSearchRequests, searchResult));
+            System.out.println("Search Query Acceptor : created a SearchRequestAcceptor thread");
+        } else {
+            System.out.println("Please wait until previous search ends");
+        }
     }
     
     private String getFullMessage(String message) {
