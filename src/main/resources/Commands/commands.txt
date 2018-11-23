@@ -6,4 +6,5 @@ search man
 lsNodesFound
 lsNodesSpecial
 lsSearchRequests
-
+search king
+DOWNLOAD 1

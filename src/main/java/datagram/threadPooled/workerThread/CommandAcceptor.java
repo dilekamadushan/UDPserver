@@ -156,7 +156,13 @@ public class CommandAcceptor extends Thread {
                     } else if (query.length() > 8 && "addFile".equals(query.substring(0, 7))) {
                         System.out.println("Search Query Acceptor : User requested to add a File:" + query.substring(7));
                         fileNames.add(query.substring(7));
-                    } else {
+                    }
+                    else if (searchResult.isInUse() && query.length() > 9 && "DOWNLOAD".equals(query.substring(0, 8))) {
+                        int index = Integer.parseInt(query.substring(9))-1;
+                        System.out.println("Search Query Acceptor : User requested to download File:" + searchResult.getFileNames().get(index));
+                        executorService.execute(new DownloadReceiver(running,searchResult.getNodes().get(index).getIpString(),searchResult.getNodes().get(index).getPort()+20,searchResult.getFileNames().get(index)));
+                    }
+                    else {
                         System.out.println("Search Query Acceptor : unidentified query:" + query);
                     }
                 
@@ -187,7 +193,14 @@ public class CommandAcceptor extends Thread {
                     InetAddress.getByAddress(node.getIp()), node.getPort());
             datagramSocket.send(nodeDatagramPacket);
             System.out.println("Search Query Acceptor:Leave Message sent to " + BSIP + " " + BSport + " " + msg);
-            
+            try {
+                Thread.sleep(500);
+                datagramSocket.send(nodeDatagramPacket);
+            }
+            catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+    
         }
         
         Socket TCPSocket = new Socket(BSIP, BSport);

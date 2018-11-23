@@ -4,6 +4,7 @@ import datagram.threadPooled.domain.Node;
 import datagram.threadPooled.domain.RegisterAndJoinMessenger;
 import datagram.threadPooled.domain.SearchResult;
 import datagram.threadPooled.workerThread.CommandAcceptor;
+import datagram.threadPooled.workerThread.DownloadServer;
 import datagram.threadPooled.workerThread.GossipAcceptor;
 import datagram.threadPooled.workerThread.GossipSender;
 import datagram.threadPooled.workerThread.HeartBeatRequestAcceptor;
@@ -81,6 +82,8 @@ public class Server extends Thread {
     
     private WebUpdater webUpdater;
     
+    private DownloadServer downloadServer;
+    
     private int myIdForDisplay;
     
     
@@ -138,6 +141,11 @@ public class Server extends Thread {
             System.out.println("Server Thread: Kafka logger started");
            // webUpdater = new WebUpdater(running,myNode,BSIP,BSPort,searchResult);
             System.out.println("Server Thread: Web Updater started");
+            
+            downloadServer = new DownloadServer(running,(myPort+20));
+            downloadServer.start();
+            System.out.println("Server Thread: Download Server started");
+    
         }
         catch (ConnectException ce) {
             System.out.println("Server Thread:Bootstrap server unreachable");
