@@ -20,8 +20,8 @@ public class TempFileCreatorImpl implements TempFileCreator {
 
     @Override
     public File createTempFile(String fileName) throws IOException {
-        String[] parts = fileName.split("\\.");
-        File file = File.createTempFile(parts[0], "." + parts[1]);
+      
+        File file = File.createTempFile(fileName,"data");
 
         int length = (random.nextInt(10) + 1) * 1000;
 

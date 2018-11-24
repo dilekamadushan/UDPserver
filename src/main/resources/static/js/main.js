@@ -1,6 +1,6 @@
 const searchResults = [];
 
-const socket = new SockJS('http://localhost:8080/ws');
+const socket = new SockJS('http://localhost:2222/ws');
 const stompClient = Stomp.over(socket);
 
 stompClient.connect({}, function (frame1) {
@@ -8,7 +8,7 @@ stompClient.connect({}, function (frame1) {
     stompClient.subscribe('/topic/results', function (frame2) {
         const searchResponse = JSON.parse(frame2.body);
 
-        addSearchResult(searchResponse.searchId, searchResponse.searchResult);
+        updateSearchResults(searchResponse.results);
     });
 });
 
@@ -32,7 +32,7 @@ function sendSearch(searchText) {
 
 function updateSearchResults(results) {
     searchResults.splice(0, searchResults.length);
-    results.forEach(searchResults.push);
+    results.forEach(r => searchResults.push(r));
 }
 
 const app = new Vue({

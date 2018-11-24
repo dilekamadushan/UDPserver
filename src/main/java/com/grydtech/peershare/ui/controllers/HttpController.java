@@ -43,12 +43,11 @@ public class HttpController {
 
         File file = tempFileCreator.createTempFile(fileName);
 
-        InputStream inputStream = new FileInputStream(file);
-        InputStreamResource inputStreamResource = new InputStreamResource(inputStream);
+        InputStreamResource inputStreamResource = new InputStreamResource(new FileInputStream(file));
 
-        String md5Hash = DigestUtils.md5Hex(inputStream);
+        String hash = DigestUtils.sha1Hex(new FileInputStream(file));
 
-        LOGGER.info("generated file checksum value (md5): \"{}\"", md5Hash);
+        LOGGER.info("generated file checksum value (hash): \"{}\"", hash);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + file.getName())
