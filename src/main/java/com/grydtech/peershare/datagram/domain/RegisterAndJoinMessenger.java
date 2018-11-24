@@ -80,10 +80,18 @@ public class RegisterAndJoinMessenger {
         out = new PrintWriter(TCPSocket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(TCPSocket.getInputStream()));
         
-        out.println(msg);
+        //send UNREG message first
+    
+        out.println(getMessageLength("UNREG "+myNode.getIpString()+" "+myNode.getPort()));
         char[] chars = new char[8192];
         int read = in.read(chars);
         String inMesssage = String.valueOf(chars, 0, read);
+        System.out.println("Register and Join Messenger:Reply from BS server:" + inMesssage);
+        
+        out.println(msg);
+         chars = new char[8192];
+         read = in.read(chars);
+        inMesssage = String.valueOf(chars, 0, read);
         System.out.println("Register and Join Messenger:Reply from BS server:" + inMesssage);
         String REGOK = inMesssage.substring(5, 10);
         int lengthOfMessage = Integer.parseInt(inMesssage.substring(0, 4));

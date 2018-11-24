@@ -117,6 +117,8 @@ public class CommandAcceptor extends Thread {
                 case "resetSearchResult":
                     System.out.println("Search Query Acceptor :The search result is reset ");
                     searchResult.reset();
+                    previousSearchRequests.removeAll(previousSearchRequests);
+                    previousSearchResponses.removeAll(previousSearchResponses);
                     break;
                 case "leave":
                     System.out.println("Search Query Acceptor :The system is trying to leave the system ");
