@@ -82,11 +82,18 @@ public class RegisterAndJoinMessenger {
         
         //send UNREG message first
     
-        out.println(getMessageLength("UNREG "+myNode.getIpString()+" "+myNode.getPort()));
+        out.println(getMessageLength("UNREG "+myNode.getIpString()+" "+myNode.getPort()+" "+myNode.getNodeName()));
         char[] chars = new char[8192];
         int read = in.read(chars);
         String inMesssage = String.valueOf(chars, 0, read);
         System.out.println("Register and Join Messenger:Reply from BS server:" + inMesssage);
+        TCPSocket.close();
+        out.close();
+        in.close();
+    
+        TCPSocket = new Socket(BSIp, BSPort);
+        out = new PrintWriter(TCPSocket.getOutputStream(), true);
+        in = new BufferedReader(new InputStreamReader(TCPSocket.getInputStream()));
         
         out.println(msg);
          chars = new char[8192];
@@ -179,7 +186,7 @@ public class RegisterAndJoinMessenger {
     public boolean sendJoin() throws IOException {
         System.out.println("Register and Join Messenger:Inside Send Join method");
         
-        if (toJoinNodes.size() <= 4) {
+        if (toJoinNodes.size() <= 3) {
             System.out.println("Register and Join Messenger:Inside Send Join method and sending Join message to all nodes "
                     + toJoinNodes.size());
             ArrayList<Node> nodes = toJoinNodes;
@@ -207,7 +214,7 @@ public class RegisterAndJoinMessenger {
                 }
             }
             return true;
-        } else if (toJoinNodes.size() > 4) {
+        } else if (toJoinNodes.size() > 3) {
             Node node;
             for (int i = 0; i < 2; i++) {
                 node = toJoinNodes.get(ThreadLocalRandom.current().nextInt(0, toJoinNodes.size()));

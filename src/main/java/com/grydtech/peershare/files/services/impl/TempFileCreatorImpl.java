@@ -28,7 +28,7 @@ public class TempFileCreatorImpl implements TempFileCreator {
       
         File file = File.createTempFile(fileName,".data");
 
-        int length = (random.nextInt(10) + 1) * 1024*1024;
+        int length = (random.nextInt(5) + 2) * 1024*1024;
 
         byte[] array = new byte[length];
         random.nextBytes(array);
@@ -42,8 +42,7 @@ public class TempFileCreatorImpl implements TempFileCreator {
     
         String md5Hash = DigestUtils.md5Hex(new FileInputStream(file)).toUpperCase();
         String sha1Hash = DigestUtils.sha1Hex(new FileInputStream(file)).toUpperCase();
-    
-        LOGGER.info("checksum value (md5): \"{}\"", md5Hash);
+        
         LOGGER.info("checksum value (sha1): \"{}\"", sha1Hash);
     
         return file;

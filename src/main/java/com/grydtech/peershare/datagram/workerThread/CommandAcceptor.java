@@ -123,7 +123,7 @@ public class CommandAcceptor extends Thread {
                 case "leave":
                     System.out.println("Search Query Acceptor :The system is trying to leave the system ");
                     try {
-                        sendLeaveMessage(BSIP, BSport);
+                        sendLEAVEAndUNREGMessage(BSIP, BSport);
                     }
                     catch (IOException e) {
                         e.printStackTrace();
@@ -179,22 +179,35 @@ public class CommandAcceptor extends Thread {
         }
     }
     
-    private void sendLeaveMessage(String BSIP, Integer BSport) throws IOException {
+    private void sendLEAVEAndUNREGMessage(String BSIP, Integer BSport) throws IOException {
         System.out.println("Search Query Acceptor:inside send leave message method " + BSIP + " " + BSport);
         String msg = getFullMessage("LEAVE " + myNode.getIpString() + " " + myNode.getPort());
         byte[] bufToSend = msg.getBytes();
         System.out.println("Search Query Acceptor:Leave Message:" + msg);
-        DatagramPacket nodeDatagramPacket = new DatagramPacket(bufToSend, bufToSend.length, InetAddress.getByName(BSIP),
-                BSport);
-        datagramSocket.send(nodeDatagramPacket);
-        System.out.println("Search Query Acceptor:Leave Message sent to " + BSIP + " " + BSport + " " + msg);
+        
+         running = false; 
+         
+        for (Node node : routingTable) {
+            DatagramPacket nodeDatagramPacket = new DatagramPacket(bufToSend, bufToSend.length,
+                    InetAddress.getByAddress(node.getIp()), node.getPort());
+            datagramSocket.send(nodeDatagramPacket);
+            System.out.println("Search Query Acceptor:Leave Message sent to " + node.getIpString() + " " + node.getPort() + " " + msg);
+            try {
+                Thread.sleep(500);
+                datagramSocket.send(nodeDatagramPacket);
+            }
+            catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            
+        }
         
         Socket TCPSocket = new Socket(BSIP, BSport);
         PrintWriter out = new PrintWriter(TCPSocket.getOutputStream(), true);
         BufferedReader in = new BufferedReader(new InputStreamReader(TCPSocket.getInputStream()));
         
-        out.println(msg);
-        running = false;
+        out.println(getFullMessage("UNREG "+myNode.getIpString()+" "+myNode.getPort()+" "+myNode.getNodeName()));
+       
         char[] chars = new char[8192];
         int read = in.read(chars);
         String inMesssage = String.valueOf(chars, 0, read);
@@ -203,6 +216,10 @@ public class CommandAcceptor extends Thread {
             String leaveOK = inMesssage.substring(5, 12);
             System.out.println("Command Executor:LEAVEOK message:" + leaveOK);
         }
+        
+        out.close();
+        in.close();
+         TCPSocket.close();
     }
     
 }
