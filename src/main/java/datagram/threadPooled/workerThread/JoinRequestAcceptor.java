@@ -51,13 +51,17 @@ public class JoinRequestAcceptor extends Thread {
             System.out.println("JoinRequestAcceptor: Failed to send Join Response " + params[2] + " " + params[3]);
             e.printStackTrace();
         }
-        
+        catch (InterruptedException e) {
+            System.out.println("JoinRequestAcceptor: Failed to send 2nd Join Response " + params[2] + " " + params[3]);
+            e.printStackTrace();
+        }
+    
         Node node = routingTable.stream()
                 .filter(s -> Objects.equals(s.getIpString(), params[2]) && s.getPort() == Integer.parseInt(params[3]))
                 .findFirst().orElse(null);
         if (node != null) {
             node.setJoined(true);
-            System.out.println("JoinRequestAcceptor:previous node was joined ");
+            System.out.println("JoinRequestAcceptor:previous node was joined "+node.toString());
         } else if (!(myNode.getIpString().equals(params[2]) && myNode.getPort() == Integer.parseInt(params[3]))) {
             System.out.println("JoinRequestAcceptor:The node who sent message: " + request + " is not in the routing table");
             String[] ips = params[2].replace(".", " ").split(" ");
@@ -79,7 +83,7 @@ public class JoinRequestAcceptor extends Thread {
         
     }
     
-    private void sendJOINResponse(String ip, String port) throws IOException {
+    private void sendJOINResponse(String ip, String port) throws IOException, InterruptedException {
         
         System.out.println("JoinRequestAcceptor:Trying to send join response for node" + ip + " " + port);
         String messge = getMessageLength("JOINOK 0");
@@ -88,6 +92,10 @@ public class JoinRequestAcceptor extends Thread {
                 Integer.parseInt(port));
         threadDatagramSocket.send(nodeDatagramPacket);
         System.out.println("JoinRequestAcceptor: sent join response for node" + ip + " " + port + " " + messge);
+    
+        Thread.sleep(500);
+        threadDatagramSocket.send(nodeDatagramPacket);
+        System.out.println("JoinRequestAcceptor: Successfully sent the 2nd join response message "+messge);
         
     }
     

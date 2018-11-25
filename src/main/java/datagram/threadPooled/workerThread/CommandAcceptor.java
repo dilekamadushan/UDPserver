@@ -127,7 +127,7 @@ public class CommandAcceptor extends Thread {
                     }
                     catch (IOException e) {
                         e.printStackTrace();
-                        System.out.println("Search Query Acceptor :The system is trying to leave the system ");
+                        System.out.println("Search Query Acceptor :Leave Failed ");
                     }
                     break;
                 case "lsNodesSpecial":

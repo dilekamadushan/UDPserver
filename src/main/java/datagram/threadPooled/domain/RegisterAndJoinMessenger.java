@@ -20,6 +20,8 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class RegisterAndJoinMessenger {
     
+    public int registeredIndex;
+    
     private String BSIP;
     
     private int BSPort;
@@ -40,10 +42,8 @@ public class RegisterAndJoinMessenger {
     
     private Node myNode;
     
-    public int registeredIndex;
-    
-    public RegisterAndJoinMessenger(String BSIP, int BSPort, Node myNode, DatagramSocket socket,
-            ArrayList<Node> toJoinNodes, ArrayList<Node> triedToJoinNodes, CopyOnWriteArrayList<Node> routingTable) {
+    public RegisterAndJoinMessenger(String BSIP, int BSPort, Node myNode, DatagramSocket socket, ArrayList<Node> toJoinNodes,
+            ArrayList<Node> triedToJoinNodes, CopyOnWriteArrayList<Node> routingTable) {
         
         this.BSIP = BSIP;
         this.BSPort = BSPort;
@@ -56,7 +56,8 @@ public class RegisterAndJoinMessenger {
     
     public boolean start() throws IOException {
         System.out.println("Register and Join Messenger:Started");
-        boolean isRegistered = Register(BSIP, BSPort, "REG " + myNode.getIpString() + " " + myNode.getPort() + " " +myNode.getNodeName());
+        boolean isRegistered = Register(BSIP, BSPort,
+                "REG " + myNode.getIpString() + " " + myNode.getPort() + " " + myNode.getNodeName());
         
         if (isRegistered) {
             System.out.println("Register and Join Messenger:Bootstrap Server Successfully Registered");
@@ -74,15 +75,15 @@ public class RegisterAndJoinMessenger {
     //Function to register in BS
     public boolean Register(String BSIp, int BSPort, String msg) throws IOException {
         msg = getMessageLength(msg);
-        System.out.println("Register and Join Messenger:REG  message from node "+msg);
+        System.out.println("Register and Join Messenger:REG  message from node " + msg);
         System.out.println("Register and Join Messenger:Trying to create a TCP connection to send REG");
         TCPSocket = new Socket(BSIp, BSPort);
         out = new PrintWriter(TCPSocket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(TCPSocket.getInputStream()));
-    
+        
         //send UNREG message first
-    
-        out.println(getMessageLength("UNREG "+myNode.getIpString()+" "+myNode.getPort()+" "+myNode.getNodeName()));
+        
+        out.println(getMessageLength("UNREG " + myNode.getIpString() + " " + myNode.getPort() + " " + myNode.getNodeName()));
         char[] chars = new char[8192];
         int read = in.read(chars);
         String inMesssage = String.valueOf(chars, 0, read);
@@ -90,11 +91,11 @@ public class RegisterAndJoinMessenger {
         TCPSocket.close();
         out.close();
         in.close();
-    
+        
         TCPSocket = new Socket(BSIp, BSPort);
         out = new PrintWriter(TCPSocket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(TCPSocket.getInputStream()));
-    
+        
         out.println(msg);
         chars = new char[8192];
         read = in.read(chars);
@@ -116,20 +117,20 @@ public class RegisterAndJoinMessenger {
             } else if (98 > code) {
                 String[] hostList;
                 
-                if(code<10){
+                if (code < 10) {
                     hostList = inMesssage.substring(13).trim().split(" ");
-                    System.out.println("Register and Join Messenger:No of Hosts connected already- " + inMesssage.substring(13));
-                }
-                else {
+                    System.out.println(
+                            "Register and Join Messenger:No of Hosts connected already- " + inMesssage.substring(13));
+                } else {
                     hostList = inMesssage.substring(14).trim().split(" ");
-                    System.out.println("Register and Join Messenger:No of Hosts connected already- " + inMesssage.substring(14));
+                    System.out.println(
+                            "Register and Join Messenger:No of Hosts connected already- " + inMesssage.substring(14));
                 }
                 
-                System.out.println(
-                        "Register and Join Messenger:last host string " + hostList + " " + hostList.length);
-                registeredIndex = (hostList.length/3);
+                System.out.println("Register and Join Messenger:last host string " + hostList + " " + hostList.length);
+                registeredIndex = (hostList.length / 3);
                 for (int i = 0; i < hostList.length; i += 3) {
-                //for (int i = 0; i < 6; i += 3) {
+                    //for (int i = 0; i < 6; i += 3) {
                     
                     System.out.println(
                             "Register and Join Messenger:Inside the loop:" + hostList[i] + " " + hostList[i + 1] + " "
@@ -138,14 +139,13 @@ public class RegisterAndJoinMessenger {
                     System.out.println(
                             "Register and Join Messenger:" + Integer.parseInt(ips[0]) + " " + Integer.parseInt(ips[1]) + " "
                                     + Integer.parseInt(ips[2]) + " " + Integer.parseInt(ips[3]));
-                    System.out.println(
-                            "Register and Join Messenger:pppppppppp" +hostList[i + 2]);
+                    System.out.println("Register and Join Messenger:pppppppppp" + hostList[i + 2]);
                     
                     Node node = new Node(new byte[] { (byte) Integer.parseInt(ips[0]), (byte) Integer.parseInt(ips[1]),
                             (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) },
-                            Integer.parseInt(hostList[i + 1]),hostList[i+2],UUID.randomUUID());
+                            Integer.parseInt(hostList[i + 1]), hostList[i + 2], UUID.randomUUID());
                     node.setIpString(hostList[i]);
-                    node.setIdForDisplay(Integer.parseInt(hostList[i+1].substring(hostList[i+1].length()-1)));
+                    node.setIdForDisplay(Integer.parseInt(hostList[i + 1].substring(hostList[i + 1].length() - 1)));
                     toJoinNodes.add(node);
                     routingTable.add(node);
                     System.out.println("Register and Join Messenger: added new node" + node.toString());
@@ -202,7 +202,10 @@ public class RegisterAndJoinMessenger {
                             InetAddress.getByAddress(node.getIp()), node.getPort());
                     node.increaseRetries();
                     threadUDPSocket.send(nodeDatagramPacket);
-                    System.out.println("Register and Join Messenger: Successfully sent the join message "+message);
+                    System.out.println("Register and Join Messenger: Successfully sent the join message " + message);
+                    
+                    threadUDPSocket.send(nodeDatagramPacket);
+                    System.out.println("Register and Join Messenger: Successfully sent the 2nd join message " + message);
                 }
                 catch (UnknownHostException e) {
                     System.out.println("Register and Join Messenger:Node unreachable");
@@ -230,7 +233,10 @@ public class RegisterAndJoinMessenger {
                             InetAddress.getByAddress(node.getIp()), node.getPort());
                     node.increaseRetries();
                     threadUDPSocket.send(nodeDatagramPacket);
-                    System.out.println("Register and Join Messenger: Successfully sent the join message "+message);
+                    System.out.println("Register and Join Messenger: Successfully sent the join message " + message);
+                    
+                    threadUDPSocket.send(nodeDatagramPacket);
+                    System.out.println("Register and Join Messenger: Successfully sent the 2nd join message " + message);
                 }
                 catch (UnknownHostException e) {
                     System.out.println("Register and Join Messenger:Node unreachable");
@@ -248,13 +254,12 @@ public class RegisterAndJoinMessenger {
         return false;
     }
     
-    public String getMessageLength(String message){
-        int size = message.length()+5;
-        if(size<100){
-            return "00"+size+" "+message;
-        }
-        else{
-            return "0"+size+" "+message;
+    public String getMessageLength(String message) {
+        int size = message.length() + 5;
+        if (size < 100) {
+            return "00" + size + " " + message;
+        } else {
+            return "0" + size + " " + message;
         }
     }
     
