@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -57,7 +58,7 @@ public class DownloadServer extends Thread {
                     System.out.println("DownloadServer:DOWNLOAD request received");
                     out.println(request);
                     System.out.println("DownloadServer:Trying to generate a file" + request.substring(9));
-                    File file = generateFile(request.substring(9));
+                    File file = generateFile(request.substring(9)+"_server.data");
                     
                     //Specify the file
                     FileInputStream fileInputStream = new FileInputStream(file);
@@ -84,16 +85,16 @@ public class DownloadServer extends Thread {
                         contents = new byte[size];
                         bufferedInputStream.read(contents, 0, size);
                         os.write(contents);
-                        System.out.print("Sending file ... " + (current * 100) / fileLength + "% complete!\n");
+                        System.out.print("DownloadServer:Sending file ... " + (current * 100) / fileLength + "% complete!");
                     }
                     
                     os.flush();
                     //File transfer done. Close the socket connection!
                     clientSocket.close();
-                    System.out.println("File sent succesfully!");
+                    System.out.println("DownloadServer:File sent succesfully!");
                     
                 } else {
-                    out.println("unrecognised request");
+                    out.println("DownloadServer:unrecognised request");
                 }
                 
                 serverSocket.close();
@@ -107,18 +108,9 @@ public class DownloadServer extends Thread {
         
     }
     
-    private String getFullMessage(String message) {
-        int size = message.length() + 5;
-        if (size < 100) {
-            return "00" + size + " " + message;
-        } else {
-            return "0" + size + " " + message;
-        }
-    }
-    
     private File generateFile(String fileName) {
         
-        int length = (new Random().nextInt(10) + 1) * 1000 * 1000;
+        int length = (new Random().nextInt(5) + 1) * 1000 * 1000;
         
         byte[] b = new byte[length];
         new Random().nextBytes(b);
@@ -131,17 +123,16 @@ public class DownloadServer extends Thread {
             fileWriter.write(s);
             fileWriter.close();
             
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] encodedhash = createSha1(file);
             
-            byte[] encodedhash = digest.digest(s.getBytes(StandardCharsets.UTF_8));
-            
-            System.out.println("Download Server:SHA hash of file" + bytesToHex(encodedhash));
+            System.out.println("Download Server:SHA hash of file in Hexa Decimal" + bytesToHex(encodedhash));
+            System.out.println("temporary file generated with size:"+file.length()/(1024*1024)+"MB");
         }
-        catch (IOException | NoSuchAlgorithmException e) {
+        catch (Exception e) {
             e.printStackTrace();
         }
-        
-        System.out.println("temporary file generated with random content");
+    
+       
         
         return file;
         
@@ -156,6 +147,20 @@ public class DownloadServer extends Thread {
             hexString.append(hex);
         }
         return hexString.toString();
+    }
+    
+    public byte[] createSha1(File file) throws Exception  {
+        MessageDigest digest = MessageDigest.getInstance("SHA-1");
+        InputStream fis = new FileInputStream(file);
+        int n = 0;
+        byte[] buffer = new byte[8192];
+        while (n != -1) {
+            n = fis.read(buffer);
+            if (n > 0) {
+                digest.update(buffer, 0, n);
+            }
+        }
+        return digest.digest();
     }
     
 }

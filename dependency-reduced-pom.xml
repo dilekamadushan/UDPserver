@@ -48,6 +48,14 @@
       </plugin>
     </plugins>
   </build>
+  <repositories>
+    <repository>
+      <releases />
+      <snapshots />
+      <id>msstack-msstack-artifacts</id>
+      <url>https://packagecloud.io/msstack/msstack-artifacts/maven2</url>
+    </repository>
+  </repositories>
   <properties>
     <kafka.version>0.11.0.1</kafka.version>
   </properties>

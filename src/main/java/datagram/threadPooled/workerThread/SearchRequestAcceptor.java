@@ -91,7 +91,7 @@ public class SearchRequestAcceptor implements Runnable {
                 }
                 System.out.println(packetCount+"SearchRequestAcceptor:search query:" + searchQuery.toString() + " "
                         + searchRequest.toString());
-                List<String> foundFiles = fileNames.stream().filter(s -> s.toLowerCase().contains(searchQuery.toString()))
+                List<String> foundFiles = fileNames.stream().filter(s -> s.toLowerCase().contains(searchQuery.toString().toLowerCase()))
                         .collect(toList());
                 
                 if (foundFiles.size() != 0) {

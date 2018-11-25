@@ -4,7 +4,6 @@ lsSearchResult
 lsSearchResponses
 search man
 lsNodesFound
-lsNodesSpecial
 lsSearchRequests
-search king
+search windows
 DOWNLOAD 1

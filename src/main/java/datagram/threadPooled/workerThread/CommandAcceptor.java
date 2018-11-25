@@ -117,6 +117,8 @@ public class CommandAcceptor extends Thread {
                 case "resetSearchResult":
                     System.out.println("Search Query Acceptor :The search result is reset ");
                     searchResult.reset();
+                    previousSearchRequests.removeAll(previousSearchRequests);
+                    previousSearchResponses.removeAll(previousSearchResponses);
                     break;
                 case "leave":
                     System.out.println("Search Query Acceptor :The system is trying to leave the system ");
@@ -160,7 +162,7 @@ public class CommandAcceptor extends Thread {
                     else if (searchResult.isInUse() && query.length() > 9 && "DOWNLOAD".equals(query.substring(0, 8))) {
                         int index = Integer.parseInt(query.substring(9))-1;
                         System.out.println("Search Query Acceptor : User requested to download File:" + searchResult.getFileNames().get(index));
-                        executorService.execute(new DownloadReceiver(running,searchResult.getNodes().get(index).getIpString(),searchResult.getNodes().get(index).getPort()+20,searchResult.getFileNames().get(index)));
+                        executorService.execute(new DownloadReceiver(running,searchResult.getNodes().get(index).getIpString(),searchResult.getNodes().get(index).getPort()+20,"./"+searchResult.getFileNames().get(index)));
                     }
                     else {
                         System.out.println("Search Query Acceptor : unidentified query:" + query);
@@ -207,7 +209,7 @@ public class CommandAcceptor extends Thread {
         PrintWriter out = new PrintWriter(TCPSocket.getOutputStream(), true);
         BufferedReader in = new BufferedReader(new InputStreamReader(TCPSocket.getInputStream()));
         
-        out.println(msg);
+        out.println("UNREG "+myNode.getIpString()+" "+myNode.getPort());
         running = false;
         char[] chars = new char[8192];
         int read = in.read(chars);

@@ -76,7 +76,7 @@ public class SearchResult {
         fileInfo.append("The Search Query is ").append(query).append("\n");
         fileInfo.append("The file names found are: \n");
         for(int i =0;i<fileNames.size();i++){
-            fileInfo.append(fileNames.get(i)).append(" : ").append(nodes.get(i).toString()).append(":searchRespose").append(searchResponses.get(i)).append("\n");
+            fileInfo.append(i+1).append(":").append(fileNames.get(i)).append(" : ").append(nodes.get(i).toString()).append(":searchRespose").append(searchResponses.get(i)).append("\n");
         }
         //print all the info in this method
        return fileInfo.toString(); 

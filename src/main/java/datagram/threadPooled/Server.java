@@ -13,12 +13,14 @@ import datagram.threadPooled.workerThread.JoinRequestAcceptor;
 import datagram.threadPooled.workerThread.JoinResponseAcceptor;
 import datagram.threadPooled.workerThread.KafkaLogger;
 import datagram.threadPooled.workerThread.KafkaProducer;
+import datagram.threadPooled.workerThread.LEAVERequestAcceptor;
 import datagram.threadPooled.workerThread.SearchRequestAcceptor;
 import datagram.threadPooled.workerThread.SearcheResponseAcceptor;
 import datagram.threadPooled.workerThread.WebUpdater;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -256,8 +258,18 @@ public class Server extends Thread {
                     System.out.println("Server Thread: Heart Beat Acceptor started");
                     break;
                 }
-                
-                System.out.println("Server Thread:Not HeartBeat message");
+    
+                System.out.println("Server Thread:Not GOSSIP message");
+                whoseResponse = checkForLeaveRequestMessage(request);
+                if (whoseResponse) {
+                    System.out
+                            .println("Server Thread:Leave Request messeage Packet to be handled by Leave Request  handler ");
+                    this.threadPool.execute(new LEAVERequestAcceptor(this.UDPsocket, routingTable, myNode, request));
+                    System.out.println("Server Thread: Heart Beat Acceptor started");
+                    break;
+                }
+    
+                System.out.println("Server Thread:Not Leave message");
                 System.out.println("Server Thread: Couldn't Figure Out the handler for message " + request);
                 whoseResponse = true;
             }
@@ -274,11 +286,14 @@ public class Server extends Thread {
         
         CopyOnWriteArrayList<String> result = new CopyOnWriteArrayList<>();
         
-        //Get file from resources folder
+        /*//Get file from resources folder
         ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(classLoader.getResource(fileName).getFile());
+        File file = new File(classLoader.getResource(fileName).getFile());*/
+    
+        ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+        InputStream is = classloader.getResourceAsStream("Files/fileNames.txt");
         
-        try (Scanner scanner = new Scanner(file)) {
+        try (Scanner scanner = new Scanner(is)) {
             
             while (result.size()<5) {
                 String line = scanner.nextLine();
@@ -303,10 +318,7 @@ public class Server extends Thread {
             scanner.close();
             
         }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-        
+    
         return result;
         
     }
@@ -356,10 +368,15 @@ public class Server extends Thread {
         return request.contains("HEARTBEAT");
     }
     
-    public boolean checkForLeaveResponseMessage(String request) {
+    public boolean checkForLeaveRequestMessage(String request) {
         
-        System.out.println("Server Thread:checking for LeaveOk" + request);
-        return request.contains("LEAVEOK");
+        System.out.println("Server Thread:checking for Leave" + request);
+        if (request.contains("LEAVEOK")) {
+            return false;
+        } else if (request.contains("LEAVE")) {
+            return true;
+        }
+        return false;
     }
     
 }

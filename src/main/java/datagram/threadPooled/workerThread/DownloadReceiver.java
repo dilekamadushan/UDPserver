@@ -3,18 +3,14 @@ package datagram.threadPooled.workerThread;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Random;
 
 /**
  * Created by dileka on 9/27/18.
@@ -45,83 +41,67 @@ public class DownloadReceiver extends Thread {
     }
     
     public void run() {
-        System.out.println("DownloadReceive:Entering the file receiving loop"+fileName);
-        while (running) {
-            
-            try {
-                //Initialize socket
-                clientSocket = new Socket(InetAddress.getByName(downloadIP), downloadPort);
-    
-                out = new PrintWriter(clientSocket.getOutputStream(), true);
-                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-    
-                out.println("DOWNLOAD "+fileName);
-                System.out.println("DownloadReceive:Download request sent");
-                
-                byte[] contents = new byte[1000];
-                
-                //Initialize the FileOutputStream to the output file's full path.
-                FileOutputStream fileOutputStream = new FileOutputStream("./" + fileName+".txt");
-                BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
-                InputStream inputStream = clientSocket.getInputStream();
-                
-                //No of bytes read in one read() call
-                int bytesRead = 0;
-                System.out.println("DownloadReceiver: started Downloading file");
-                while ((bytesRead = inputStream.read(contents)) != -1)
-                    bufferedOutputStream.write(contents, 0, bytesRead);
-                
-                bufferedOutputStream.flush();
-                clientSocket.close();
-                
-                System.out.println("DownloadReceiver:File saved successfully!");
-    
-                MessageDigest digest = MessageDigest.getInstance("SHA-256");
-    
-                byte[] encodedhash = digest.digest(s.getBytes(StandardCharsets.UTF_8));
-    
-                System.out.println("Download Server:SHA hash of file" + bytesToHex(encodedhash));
-                
-            }
-            catch (IOException | NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            }
-        }
+        System.out.println("DownloadReceive:Entering the file receiving loop" + fileName);
         
-    }
-    
-    private String getFullMessage(String message) {
-        int size = message.length() + 5;
-        if (size < 100) {
-            return "00" + size + " " + message;
-        } else {
-            return "0" + size + " " + message;
-        }
-    }
-    
-    private File generateFile(String fileName) {
-        
-        int length = (new Random().nextInt(10) + 1) * 1000 * 1000;
-        
-        byte[] b = new byte[length];
-        new Random().nextBytes(b);
-        File file = null;
         try {
-            String s = new String(b, StandardCharsets.UTF_8);
-            file = new File(fileName);
+            //Initialize socket
+            clientSocket = new Socket(InetAddress.getByName(downloadIP), downloadPort);
             
-            FileWriter fileWriter = new FileWriter(file);
-            fileWriter.write(s);
-            fileWriter.close();
+            out = new PrintWriter(clientSocket.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            
+            out.println("DOWNLOAD " + fileName);
+            System.out.println("DownloadReceive:Download request sent");
+            
+            byte[] contents = new byte[1000];
+    
+            File file = new File(fileName+"_client.data");
+            System.out.println("DownloadReceive:Size when creating file"+file.length());
+            //Initialize the FileOutputStream to the output file's full path.
+            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
+            InputStream inputStream = clientSocket.getInputStream();
+            
+            //No of bytes read in one read() call
+            int bytesRead = 0;
+            System.out.println("DownloadReceiver: started Downloading file");
+            while ((bytesRead = inputStream.read(contents)) != -1)
+                bufferedOutputStream.write(contents, 0, bytesRead);
+            
+            bufferedOutputStream.flush();
+            clientSocket.close();
+            
+            System.out.println("DownloadReceiver:File saved successfully!" + file.length());
+            
+            byte[] encodedhash = createSha1(file);
+            
+            System.out.println("Download Receiver:SHA hash of file" + bytesToHex(encodedhash));
+            System.out.println("temporary file generated with size:" + file.length() / (1024 * 1024) + "MB");
+            
+            inputStream.close();
+            fileOutputStream.close();
+            bufferedOutputStream.close();
         }
-        catch (IOException e) {
+        catch (Exception e) {
             e.printStackTrace();
         }
         
-        System.out.println("temporary file generated with random content");
-        return file;
-        
     }
+    
+    public byte[] createSha1(File file) throws Exception {
+        MessageDigest digest = MessageDigest.getInstance("SHA-1");
+        InputStream fis = new FileInputStream(file);
+        int n = 0;
+        byte[] buffer = new byte[8192];
+        while (n != -1) {
+            n = fis.read(buffer);
+            if (n > 0) {
+                digest.update(buffer, 0, n);
+            }
+        }
+        return digest.digest();
+    }
+    
     private String bytesToHex(byte[] hash) {
         StringBuilder hexString = new StringBuilder();
         for (byte aHash : hash) {
