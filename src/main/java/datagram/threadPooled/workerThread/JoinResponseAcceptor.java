@@ -42,7 +42,6 @@ public class JoinResponseAcceptor extends Thread {
                     "Routing Table Manager: A node responded to the Join message:" + address + " " + port + " " + node
                             .getIpString());
             node.setJoined(true);
-            node.setStatus(true);
             System.out.println("Routing Table Manager:The new Routing table ");
         }
         for (Node peer : routingTable) {

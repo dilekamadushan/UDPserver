@@ -91,7 +91,7 @@ public class CommandAcceptor extends Thread {
                             System.out.println(n.toString());
                         }
                     });
-        
+                    
                     break;
                 case "lsFiles":
                     System.out.println("Search Query Acceptor :The files in this node are:");
@@ -158,13 +158,16 @@ public class CommandAcceptor extends Thread {
                     } else if (query.length() > 8 && "addFile".equals(query.substring(0, 7))) {
                         System.out.println("Search Query Acceptor : User requested to add a File:" + query.substring(7));
                         fileNames.add(query.substring(7));
-                    }
-                    else if (searchResult.isInUse() && query.length() > 9 && "DOWNLOAD".equals(query.substring(0, 8))) {
-                        int index = Integer.parseInt(query.substring(9))-1;
-                        System.out.println("Search Query Acceptor : User requested to download File:" + searchResult.getFileNames().get(index));
-                        executorService.execute(new DownloadReceiver(running,searchResult.getNodes().get(index).getIpString(),searchResult.getNodes().get(index).getPort()+20,"./"+searchResult.getFileNames().get(index)));
-                    }
-                    else {
+                    } else if (searchResult.isInUse() && query.length() > 9 && "DOWNLOAD".equals(query.substring(0, 8))) {
+                        int index = Integer.parseInt(query.substring(9)) - 1;
+                        System.out.println(
+                                "Search Query Acceptor : User requested to download File:" + searchResult.getFileNames()
+                                        .get(index));
+                        executorService.execute(
+                                new DownloadReceiver(running, searchResult.getNodes().get(index).getIpString(),
+                                        searchResult.getNodes().get(index).getPort() + 20,
+                                        "./" + searchResult.getFileNames().get(index)));
+                    } else {
                         System.out.println("Search Query Acceptor : unidentified query:" + query);
                     }
                 
@@ -185,16 +188,17 @@ public class CommandAcceptor extends Thread {
     }
     
     private void sendLEAVEAndUNREGMessage(String BSIP, Integer BSport) throws IOException {
-        System.out.println("Search Query Acceptor:inside send leave message method " + BSIP + " " + BSport);
+        System.out.println("Search Query Acceptor:inside send leave message method ");
         String msg = getFullMessage("LEAVE " + myNode.getIpString() + " " + myNode.getPort());
         byte[] bufToSend = msg.getBytes();
-        System.out.println("Search Query Acceptor:Leave Message:" + msg);
+        System.out.println("Search Query Acceptor:Leave Message:" + msg + " for peers");
         
         for (Node node : routingTable) {
             DatagramPacket nodeDatagramPacket = new DatagramPacket(bufToSend, bufToSend.length,
                     InetAddress.getByAddress(node.getIp()), node.getPort());
             datagramSocket.send(nodeDatagramPacket);
-            System.out.println("Search Query Acceptor:Leave Message sent to " + BSIP + " " + BSport + " " + msg);
+            System.out.println(
+                    "Search Query Acceptor:Leave Message sent to " + node.getIpString() + " " + node.getPort() + " " + msg);
             try {
                 Thread.sleep(500);
                 datagramSocket.send(nodeDatagramPacket);
@@ -202,23 +206,26 @@ public class CommandAcceptor extends Thread {
             catch (InterruptedException e) {
                 e.printStackTrace();
             }
-    
+            
         }
         
         Socket TCPSocket = new Socket(BSIP, BSport);
         PrintWriter out = new PrintWriter(TCPSocket.getOutputStream(), true);
         BufferedReader in = new BufferedReader(new InputStreamReader(TCPSocket.getInputStream()));
         
-        out.println("UNREG "+myNode.getIpString()+" "+myNode.getPort());
-        running = false;
+        out.println(getFullMessage("UNREG " + myNode.getIpString() + " " + myNode.getPort() + " " + myNode.getNodeName()));
         char[] chars = new char[8192];
         int read = in.read(chars);
         String inMesssage = String.valueOf(chars, 0, read);
         System.out.println("Command Executor:Reply from BS server:" + inMesssage);
-        if (inMesssage.length() > 12) {
-            String leaveOK = inMesssage.substring(5, 12);
-            System.out.println("Command Executor:LEAVEOK message:" + leaveOK);
+        if (inMesssage.length() == 12) {
+            System.out.println("Command Executor:Unregistering successful:" + inMesssage);
         }
+        TCPSocket.close();
+        in.close();
+        out.close();
+        
+        running = false;
     }
     
 }
