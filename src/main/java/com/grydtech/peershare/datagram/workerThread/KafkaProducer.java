@@ -65,11 +65,11 @@ public class KafkaProducer extends Thread {
     }
     
     private void produce() {
-    
+        
         for (Node node : routingTable) {
             if (node.isStatus()) {
                 String edge = "" + myNode.getIdForDisplay() + node.getIdForDisplay();
-            
+                
                 // Send the sentence to the test topic
                 ProducerRecord<String, String> data = new ProducerRecord<>(topic, edge);
                 long startTime = System.currentTimeMillis();

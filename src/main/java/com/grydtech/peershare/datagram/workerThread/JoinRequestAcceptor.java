@@ -1,13 +1,11 @@
 package com.grydtech.peershare.datagram.workerThread;
 
 import com.grydtech.peershare.datagram.domain.Node;
-import com.grydtech.peershare.datagram.domain.SearchResult;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -21,15 +19,9 @@ public class JoinRequestAcceptor extends Thread {
     
     private CopyOnWriteArrayList<Node> routingTable;
     
-    private ArrayList<String> fileNames;
-    
     private Node myNode;
     
     private String request;
-    
-    private Boolean isHomeMade;
-    
-    private SearchResult searchResult;
     
     public JoinRequestAcceptor(DatagramSocket socket, CopyOnWriteArrayList<Node> routingTable, Node myNode, String request) {
         
@@ -51,6 +43,10 @@ public class JoinRequestAcceptor extends Thread {
             System.out.println("JoinRequestAcceptor: Failed to send Join Response " + params[2] + " " + params[3]);
             e.printStackTrace();
         }
+        catch (InterruptedException e) {
+            System.out.println("JoinRequestAcceptor: Failed to send 2nd Join Response " + params[2] + " " + params[3]);
+            e.printStackTrace();
+        }
         
         Node node = routingTable.stream()
                 .filter(s -> Objects.equals(s.getIpString(), params[2]) && s.getPort() == Integer.parseInt(params[3]))
@@ -65,9 +61,8 @@ public class JoinRequestAcceptor extends Thread {
                     (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, Integer.parseInt(params[3]),
                     "FromJoinMessage", UUID.randomUUID());
             node.setIpString(params[2]);
-            node.setStatus(true);
+            node.setJoined(true);
             node.setIdForDisplay(Integer.parseInt(params[3].substring(params[3].length() - 1)));
-            node.setDiscoveredBy("From Join Request"+request);
             routingTable.add(node);
             System.out.println("JoinRequestAcceptor:The node" + node.getIpString() + " " + node.getPort()
                     + " is added in the routing table");
@@ -80,7 +75,7 @@ public class JoinRequestAcceptor extends Thread {
         
     }
     
-    private void sendJOINResponse(String ip, String port) throws IOException {
+    private void sendJOINResponse(String ip, String port) throws IOException, InterruptedException {
         
         System.out.println("JoinRequestAcceptor:Trying to send join response for node" + ip + " " + port);
         String messge = getMessageLength("JOINOK 0");
@@ -89,6 +84,10 @@ public class JoinRequestAcceptor extends Thread {
                 Integer.parseInt(port));
         threadDatagramSocket.send(nodeDatagramPacket);
         System.out.println("JoinRequestAcceptor: sent join response for node" + ip + " " + port + " " + messge);
+        
+        Thread.sleep(500);
+        threadDatagramSocket.send(nodeDatagramPacket);
+        System.out.println("JoinRequestAcceptor: Successfully sent the 2nd join response message " + messge);
         
     }
     

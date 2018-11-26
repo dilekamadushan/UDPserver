@@ -23,7 +23,6 @@ public class KafkaLogger {
     
     private TestCallback testCallback;
     
-    
     public KafkaLogger(boolean running) {
         //run the program with args: producer/consumer broker:port
         String brokers = "139.59.77.98:9092";
@@ -40,7 +39,7 @@ public class KafkaLogger {
         testCallback = new TestCallback();
         this.running = running;
     }
-
+    
     public void log(int nodeName, String level) {
         
         JSONObject jo = new JSONObject();

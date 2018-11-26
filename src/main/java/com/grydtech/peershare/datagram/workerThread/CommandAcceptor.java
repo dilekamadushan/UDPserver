@@ -91,7 +91,7 @@ public class CommandAcceptor extends Thread {
                             System.out.println(n.toString());
                         }
                     });
-        
+                    
                     break;
                 case "lsFiles":
                     System.out.println("Search Query Acceptor :The files in this node are:");
@@ -133,7 +133,7 @@ public class CommandAcceptor extends Thread {
                 case "lsNodesSpecial":
                     System.out.println("Search Query Acceptor :The nodes in the routing table are:");
                     routingTable.forEach(n -> System.out.println(n.toString()));
-        
+                    
                     break;
                 default:
                     if (query.length() > 7 && "search".equals(query.substring(0, 6))) {
@@ -153,17 +153,16 @@ public class CommandAcceptor extends Thread {
         }
         //once finished
     }
-
+    
     public void submitSearchRequest(String keyword) {
         if (!searchResult.isInUse()) {
             System.out.println("Search Query Acceptor: accepted query: " + keyword);
             searchResult.setQuery(keyword);
             searchResult.setInUse(true);
             executorService.execute(
-                    new SearchRequestAcceptor(packetCount, this.datagramSocket, routingTable, fileNames,
-                            myNode, getFullMessage(
-                            "SER " + myNode.getIpString() + " " + myNode.getPort() + " " + keyword
-                                    + " 0"), true, previousSearchRequests, searchResult));
+                    new SearchRequestAcceptor(packetCount, this.datagramSocket, routingTable, fileNames, myNode,
+                            getFullMessage("SER " + myNode.getIpString() + " " + myNode.getPort() + " " + keyword + " 0"),
+                            true, previousSearchRequests, searchResult));
             System.out.println("Search Query Acceptor : created a SearchRequestAcceptor thread");
         } else {
             System.out.println("Please wait until previous search ends");
@@ -185,13 +184,14 @@ public class CommandAcceptor extends Thread {
         byte[] bufToSend = msg.getBytes();
         System.out.println("Search Query Acceptor:Leave Message:" + msg);
         
-         running = false; 
-         
+        running = false;
+        
         for (Node node : routingTable) {
             DatagramPacket nodeDatagramPacket = new DatagramPacket(bufToSend, bufToSend.length,
                     InetAddress.getByAddress(node.getIp()), node.getPort());
             datagramSocket.send(nodeDatagramPacket);
-            System.out.println("Search Query Acceptor:Leave Message sent to " + node.getIpString() + " " + node.getPort() + " " + msg);
+            System.out.println(
+                    "Search Query Acceptor:Leave Message sent to " + node.getIpString() + " " + node.getPort() + " " + msg);
             try {
                 Thread.sleep(500);
                 datagramSocket.send(nodeDatagramPacket);
@@ -206,20 +206,19 @@ public class CommandAcceptor extends Thread {
         PrintWriter out = new PrintWriter(TCPSocket.getOutputStream(), true);
         BufferedReader in = new BufferedReader(new InputStreamReader(TCPSocket.getInputStream()));
         
-        out.println(getFullMessage("UNREG "+myNode.getIpString()+" "+myNode.getPort()+" "+myNode.getNodeName()));
-       
+        out.println(getFullMessage("UNREG " + myNode.getIpString() + " " + myNode.getPort() + " " + myNode.getNodeName()));
+        
         char[] chars = new char[8192];
         int read = in.read(chars);
         String inMesssage = String.valueOf(chars, 0, read);
         System.out.println("Command Executor:Reply from BS server:" + inMesssage);
-        if (inMesssage.length() > 12) {
-            String leaveOK = inMesssage.substring(5, 12);
-            System.out.println("Command Executor:LEAVEOK message:" + leaveOK);
+        if (inMesssage.length() == 12) {
+            System.out.println("Command Executor:Unregistering successful:" + inMesssage);
         }
         
         out.close();
         in.close();
-         TCPSocket.close();
+        TCPSocket.close();
     }
     
 }

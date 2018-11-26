@@ -34,7 +34,8 @@ public class SearcheResponseAcceptor extends Thread {
         this.myNode = myNode;
         this.previousSearchResponses = previousSearchResponses;
         this.packetCount = packetCount;
-        System.out.println(packetCount + "Search Response Acceptor:Thread started "+System.currentTimeMillis() + searchResponse);
+        System.out.println(
+                packetCount + "Search Response Acceptor:Thread started " + System.currentTimeMillis() + searchResponse);
     }
     
     public void run() {
@@ -45,7 +46,9 @@ public class SearcheResponseAcceptor extends Thread {
                 .filter(s -> s.contains(params[2]) && s.contains(params[3]) && s.contains(params[4])).findFirst()
                 .orElse(null);
         if (previousSearchResponse == null) {
-            System.out.println(packetCount + "Search Response Acceptor:no previous search request " +System.currentTimeMillis()+ searchResponse);
+            System.out.println(
+                    packetCount + "Search Response Acceptor:no previous search request " + System.currentTimeMillis()
+                            + searchResponse);
             String[] ips = params[3].replace(".", " ").split(" ");
             Node node = new Node(new byte[] { (byte) Integer.parseInt(ips[0]), (byte) Integer.parseInt(ips[1]),
                     (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, Integer.parseInt(params[4]),
@@ -93,23 +96,25 @@ public class SearcheResponseAcceptor extends Thread {
                     .getPort())) {
                 System.out.println(packetCount + "Search Response Acceptor:Found new node ");
                 node.setStatus(true);
-                node.setDiscoveredBy("From search response "+searchResponse);
+                node.setDiscoveredBy("From search response " + searchResponse);
                 routingTable.add(node);
                 System.out.println(packetCount + "Search Response Acceptor:Added node " + node.toString());
             } else if (newNode != null) {
                 //newNode.setJoined(true);
                 newNode.setStatus(true);
-                if(Objects.equals(node.getDiscoveredBy(), "")){
-                    node.setDiscoveredBy("From search response "+searchResponse);
+                if (Objects.equals(node.getDiscoveredBy(), "")) {
+                    node.setDiscoveredBy("From search response " + searchResponse);
                 }
             }
             previousSearchResponses.add(searchResponse);
-            System.out.println(packetCount + "SearchResponseAcceptor: added search response to cache" +System.currentTimeMillis()+ searchResponse);
+            System.out.println(
+                    packetCount + "SearchResponseAcceptor: added search response to cache" + System.currentTimeMillis()
+                            + searchResponse);
             
         } else {
             System.out.println(
-                    packetCount + "SearchResponseAcceptor:Search request is not processed. It was received earlier "+System.currentTimeMillis()
-                            + previousSearchResponse + " " + searchResponse);
+                    packetCount + "SearchResponseAcceptor:Search request is not processed. It was received earlier " + System
+                            .currentTimeMillis() + previousSearchResponse + " " + searchResponse);
         }
     }
 }

@@ -48,7 +48,7 @@ public class HeartBeatRequestAcceptor extends Thread {
             node.setIpString(params[2]);
             node.setIdForDisplay(Integer.parseInt(params[3].substring(params[3].length() - 1)));
             node.setStatus(true);
-            node.setDiscoveredBy("From Heart Beat");
+            node.setDiscoveredBy("From Heart Beat"+request);
             routingTable.add(node);
             System.out.println("HeartBeatRequestAcceptor:The node" + node.getIpString() + " " + node.getPort()
                     + " is added in the routing table");

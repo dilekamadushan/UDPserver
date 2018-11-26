@@ -51,7 +51,7 @@ public class HeartBeatSender extends Thread {
         long start = System.currentTimeMillis();
         while (running) {
             List<Node> joinedNodes = routingTable.stream().filter(Node::isJoined).collect(Collectors.toList());
-            if (registerAndJoinMessenger.registeredIndex < 4|| joinedNodes.size() > 1) {
+            if (registerAndJoinMessenger.registeredIndex < 4 || joinedNodes.size() > 1) {
                 try {
                     System.out.println("HeartBeat Sender:HeartBeat thread sleep for 120 seconds:"
                             + registerAndJoinMessenger.registeredIndex);
@@ -66,7 +66,7 @@ public class HeartBeatSender extends Thread {
                 for (Node node : routingTable) {
                     try {
                         if (node.getRetries() == 3) {
-                            sendUnRegMessage(node);
+                            // sendUnRegMessage(node);
                             node.setStatus(false);
                         } else {
                             if (!(Objects.equals(node.getIpString(), myNode.getIpString()) && node.getPort() == myNode
@@ -90,8 +90,8 @@ public class HeartBeatSender extends Thread {
                 }
                 System.out.println("HeartBeat Sender::" + registerAndJoinMessenger.registeredIndex);
                 
-            } else if (registerAndJoinMessenger.registeredIndex > 3&& joinedNodes.size()<2 && (((System.currentTimeMillis()-start) / (1000*60))
-                    > 5)) {
+            } else if (registerAndJoinMessenger.registeredIndex > 3 && joinedNodes.size() < 2 && (
+                    ((System.currentTimeMillis() - start) / (1000 * 60)) > 5)) {
                 // System.out.println("HeartBeat Sender:Routing table size is 0"+routingTable.size());
                 System.out.println("HeartBeat Sender:Server failed  to  join with two nodes, retrying");
                 try {

@@ -130,7 +130,7 @@ public class Node {
     public void setJoined(boolean joined) {
         isJoined = joined;
         status = true;
-        setDiscoveredBy("From Joined Message");
+        setDiscoveredBy("From Join Message");
     }
     
     public String getIpString() {
