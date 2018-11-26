@@ -1,6 +1,6 @@
 const searchResults = [];
 
-const socket = new SockJS('http://localhost:2222/ws');
+const socket = new SockJS('/ws');
 const stompClient = Stomp.over(socket);
 
 stompClient.connect({}, function (frame1) {
