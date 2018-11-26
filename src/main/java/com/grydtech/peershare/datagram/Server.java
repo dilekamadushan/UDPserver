@@ -19,8 +19,8 @@ import com.grydtech.peershare.datagram.workerThread.WebUpdater;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -77,8 +77,6 @@ public class Server extends Thread {
     
     private CopyOnWriteArrayList<String> previousSearchResponses;
     
-    // private CopyOnWriteArrayList<String> previousSentSearchResponses;
-    
     private int packetCount = 0;
     
     private KafkaLogger kafkaLogger;
@@ -105,7 +103,6 @@ public class Server extends Thread {
         routingTable = new CopyOnWriteArrayList<>();
         previousSearchRequsts = new CopyOnWriteArrayList<>();
         previousSearchResponses = new CopyOnWriteArrayList<>();
-        //previousSentSearchResponses = new CopyOnWriteArrayList<>();
         
         String[] ips = myIP.replace(".", " ").split(" ");
         myNode = new Node(new byte[] { (byte) Integer.parseInt(ips[0]), (byte) Integer.parseInt(ips[1]),
@@ -148,11 +145,10 @@ public class Server extends Thread {
             kafkaLogger = new KafkaLogger(running);
             
             System.out.println("Server Thread: Kafka logger started");
-            // webUpdater = new WebUpdater(running,myNode,BSIP,BSPort,searchResult);
-            System.out.println("Server Thread: Web Updater started");
             
             webUpdater = new WebUpdater(running, searchResult, simpMessagingTemplate);
             webUpdater.start();
+            System.out.println("Server Thread: Web Updater started");
         }
         catch (ConnectException ce) {
             System.out.println("Server Thread:Bootstrap server unreachable");
@@ -297,10 +293,13 @@ public class Server extends Thread {
         CopyOnWriteArrayList<String> result = new CopyOnWriteArrayList<>();
         
         //Get file from resources folder
-        ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(classLoader.getResource(fileName).getFile());
+        //ClassLoader classLoader = getClass().getClassLoader();
+        //File file = new File(classLoader.getResource(fileName).getFile());
         
-        try (Scanner scanner = new Scanner(file)) {
+        ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+        InputStream is = classloader.getResourceAsStream("Files/fileNames.txt");
+        
+        try (Scanner scanner = new Scanner(is)) {
             
             while (result.size() < 5) {
                 String line = scanner.nextLine();
@@ -317,17 +316,12 @@ public class Server extends Thread {
                             stringBuilder.append(words[i]);
                         }
                     }
-                    //Collections.addAll(result, line);
                     result.add(stringBuilder.toString());
                 }
             }
             scanner.close();
             
         }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-        
         return result;
         
     }
