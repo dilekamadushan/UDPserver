@@ -1,5 +1,12 @@
 const searchResults = [];
 
+const downloadStatus = {
+    inProgress: false,
+    fileName: '',
+    filePath: '',
+    status: 'UNKNOWN'
+};
+
 const socket = new SockJS('/ws');
 const stompClient = Stomp.over(socket);
 
@@ -9,6 +16,12 @@ stompClient.connect({}, function (frame1) {
         const searchResponse = JSON.parse(frame2.body);
 
         updateSearchResults(searchResponse.results);
+    });
+
+    stompClient.subscribe('/topic/download', function (frame2) {
+        const response = JSON.parse(frame2.body);
+
+        updateDownloadProgress(response.fileName, response.filePath, response.status);
     });
 });
 
@@ -30,22 +43,43 @@ function sendSearch(searchText) {
     stompClient.send("/app/search", {}, JSON.stringify({searchText: searchText}));
 }
 
+function downloadFile(fileName, fileUrl) {
+    downloadStatus.inProgress = true;
+
+    stompClient.send("/app/download", {}, JSON.stringify({fileName: fileName, fileUrl: fileUrl}));
+
+    setTimeout(() => downloadInProgress = false, 20000);
+}
+
 function updateSearchResults(results) {
     searchResults.splice(0, searchResults.length);
     results.forEach(r => searchResults.push(r));
+}
+
+function updateDownloadProgress(fileName, filePath, status) {
+    downloadStatus.inProgress = false;
+    downloadStatus.fileName = fileName;
+    downloadStatus.filePath = filePath;
+    downloadStatus.status = status;
+
+    $('#verificationModal').modal()
 }
 
 const app = new Vue({
     el: '#app',
     data: {
         searchResults: searchResults,
-        searchText: ''
+        searchText: '',
+        downloadStatus: downloadStatus
     },
     methods: {
         search: function () {
             if (!this.searchText || this.searchText === '') return;
 
             sendSearch(this.searchText);
+        },
+        download: function (fileName, fileUrl) {
+            downloadFile(fileName, fileUrl);
         }
     }
 });

@@ -12,6 +12,7 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/loading.css">
 
     <title>PeerShare</title>
 </head>
@@ -44,12 +45,62 @@
                     <div class="card-body">
                         <h5 class="card-title">Name: {{searchResult.fileName}}</h5>
                         <h6 class="card-subtitle mb-2 text-muted">Url: {{searchResult.fileUrl}}</h6>
-                        <a v-bind:href="searchResult.fileUrl" class="btn btn-primary">Download</a>
+                        <button v-on:click="download(searchResult.fileName, searchResult.fileUrl)"
+                                class="btn btn-primary">Download
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <div v-if="downloadStatus.inProgress" class="loading-area">
+        <div class="loading">
+            <div class="lds-css ng-scope">
+                <div class="lds-spinner" style="width: 100%; height:100%">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="verificationModal" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">File Download Status</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    File saved to <span class="text-primary">{{downloadStatus.filePath}}</span><br>
+                    File verification
+                    <span v-if="downloadStatus.status === 'VALIDATION_SUCCESSFUL'"
+                          class="text-success">Successful</span>
+                    <span v-if="downloadStatus.status === 'VALIDATION_FAILED' || downloadStatus.status === 'DOWNLOAD_FAILED'"
+                          class="text-danger">Failed</span>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <!-- Vue.js -->
@@ -59,9 +110,6 @@
 <!-- SockJs and StompJs -->
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.3.0/dist/sockjs.min.js"></script>
 <script src="js/stomp.js"></script>
-
-<!-- Axios client -->
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
 <!-- Jquery, PopperJs and BootstrapJs -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"

@@ -45,15 +45,16 @@ public class HttpController {
 
         InputStreamResource inputStreamResource = new InputStreamResource(new FileInputStream(file));
 
-        String hash = DigestUtils.sha1Hex(new FileInputStream(file));
+        String hash = DigestUtils.sha1Hex(new FileInputStream(file)).toUpperCase();
     
-        System.out.println("Generated file"+fileName+" checksum value (sha hash):"+ hash);
+        System.out.println("Generated file " + fileName + " checksum value (sha hash): "+ hash);
 
         LOGGER.info("generated file checksum value (hash): \"{}\"", hash);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + file.getName())
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
+                .header("Checksum-SHA1", hash)
                 .contentLength(file.length())
                 .body(inputStreamResource);
     }
