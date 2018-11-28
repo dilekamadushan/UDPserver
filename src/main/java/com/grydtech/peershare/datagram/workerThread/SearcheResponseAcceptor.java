@@ -71,19 +71,20 @@ public class SearcheResponseAcceptor extends Thread {
                 }
             }
             
-            for (int i = 5; i < params.length; i++) {
+            for (int i = 6; i < params.length; i++) {
                 System.out.println(
                         packetCount + "Search Response Acceptor:Checking for response " + params[i].toLowerCase() + " "
                                 + searchQuery.toString());
                 if (searchResult.isInUse() && params[i].toLowerCase().contains(searchQuery.toString().toLowerCase())) {
                     searchResult.addFileName(params[i]);
-                    System.out.println(" Search Response Acceptor:Filename " + params[i]);
+                    System.out.println(" Search Response Acceptor:Filename " + params[i]+" "+searchQuery.toString());
                     if (newNode != null) {
                         searchResult.addNode(newNode);
                     } else {
                         searchResult.addNode(node);
                     }
                     searchResult.addSearchResponse(searchResponse);
+                    searchResult.addSearchHops(params[5]);
                     System.out.println(packetCount + "Search Response Acceptor:Found node " + node.toString());
                 } else {
                     System.out.println(

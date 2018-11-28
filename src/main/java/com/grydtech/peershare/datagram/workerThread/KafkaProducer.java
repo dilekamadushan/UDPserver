@@ -28,10 +28,10 @@ public class KafkaProducer extends Thread {
     
     private Node myNode;
     
-    public KafkaProducer(Node myNode, CopyOnWriteArrayList<Node> routingTable, boolean running) {
+    public KafkaProducer(String kafkaIP, Node myNode, CopyOnWriteArrayList<Node> routingTable, boolean running) {
         //run the program with args: producer/consumer broker:port
-        String brokers = "139.59.77.98:9092";
-        
+        //String brokers = "139.59.77.98:9092";
+        String brokers = kafkaIP+":9092";
         Properties props = new Properties();
         
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers);
@@ -50,9 +50,9 @@ public class KafkaProducer extends Thread {
     public void run() {
         while (running) {
             try {
-                System.out.println("Kafka Producer:Kafka producer sleeps  for 120 seconds ");
-                Thread.sleep(1000 * 15);
-                System.out.println("Kafka Producer:Kafka producer wakes ");
+                //System.out.println("Kafka Producer:Kafka producer sleeps  for 120 seconds ");
+                Thread.sleep(1000 * 5);
+                //System.out.println("Kafka Producer:Kafka producer wakes ");
                 produce();
             }
             catch (InterruptedException e) {
@@ -75,10 +75,10 @@ public class KafkaProducer extends Thread {
                 long startTime = System.currentTimeMillis();
                 producer.send(data, testCallback);
                 long elapsedTime = System.currentTimeMillis() - startTime;
-                System.out.println("Sent this edge: " + edge + " in " + elapsedTime + " ms");
+                //System.out.println("Sent this edge: " + edge + " in " + elapsedTime + " ms");
             }
         }
-        System.out.println("Done");
+        //System.out.println("Done");
         producer.flush();
     }
     
@@ -92,12 +92,12 @@ public class KafkaProducer extends Thread {
         
         @Override
         public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
-            System.out.println("Called onPartitionsRevoked with partitions:" + partitions);
+            //System.out.println("Called onPartitionsRevoked with partitions:" + partitions);
         }
         
         @Override
         public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
-            System.out.println("Called onPartitionsAssigned with partitions:" + partitions);
+            //System.out.println("Called onPartitionsAssigned with partitions:" + partitions);
         }
     }
     
@@ -106,12 +106,12 @@ public class KafkaProducer extends Thread {
         @Override
         public void onCompletion(RecordMetadata recordMetadata, Exception e) {
             if (e != null) {
-                System.out.println("Error while producing message to topic :" + recordMetadata);
+                //System.out.println("Error while producing message to topic :" + recordMetadata);
                 e.printStackTrace();
             } else {
-                String message = String.format("sent message to topic:%s partition:%s  offset:%s", recordMetadata.topic(),
-                        recordMetadata.partition(), recordMetadata.offset());
-                System.out.println(message);
+                //String message = String.format("sent message to topic:%s partition:%s  offset:%s", recordMetadata.topic(),
+                        //recordMetadata.partition(), recordMetadata.offset());
+               // System.out.println(message);
             }
         }
     }

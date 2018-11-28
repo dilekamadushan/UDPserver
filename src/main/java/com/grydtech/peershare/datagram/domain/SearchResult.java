@@ -15,6 +15,8 @@ public class SearchResult {
     
     private ArrayList<String> searchResponses;
     
+    private ArrayList<String> searchHops;
+    
     private long startTime;
     
     private boolean inUse = false;
@@ -24,6 +26,7 @@ public class SearchResult {
         fileNames = new ArrayList<>();
         searchResponses = new  ArrayList<>();
         nodes = new ArrayList<>();
+        searchHops = new ArrayList<>();
     }
     
     public void addFileName(String fileName) {
@@ -32,6 +35,10 @@ public class SearchResult {
     
     public void addSearchResponse(String searchResponse) {
         this.searchResponses.add(searchResponse);
+    }
+    
+    public void addSearchHops(String searchHop) {
+        this.searchHops.add(searchHop);
     }
     
     public ArrayList<String> getFileNames() {
@@ -75,7 +82,7 @@ public class SearchResult {
         fileInfo.append("The Search Query is ").append(query).append("\n");
         fileInfo.append("The file names found are: \n");
         for(int i =0;i<fileNames.size();i++){
-            fileInfo.append(i+1).append(":").append(fileNames.get(i)).append(" : ").append(nodes.get(i).toString()).append(":searchRespose").append(searchResponses.get(i)).append("\n");
+            fileInfo.append(i+1).append(":").append(fileNames.get(i)).append(" : ").append(nodes.get(i).toString()).append("search Hop:").append(searchHops.get(i)).append(":searchRespose").append(searchResponses.get(i)).append("\n");
         }
         //print all the info in this method
        return fileInfo.toString(); 

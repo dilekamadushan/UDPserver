@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 @Component
 public class Server extends Thread {
     
-    private ExecutorService threadPool = Executors.newFixedThreadPool(20);
+    private ExecutorService threadPool = Executors.newFixedThreadPool(35);
     
     private DatagramSocket UDPsocket;
     
@@ -60,6 +60,8 @@ public class Server extends Thread {
     private String myIP;
     
     private String BSIP;
+    
+    private String kafkaIP;
     
     private int myPort;
     
@@ -89,11 +91,12 @@ public class Server extends Thread {
     
     private CommandAcceptor commandAcceptor;
     
-    public void initServer(String BSIp, int BSPort, String myIP, int myPort, String nodeName,
+    public void initServer(String BSIp, int BSPort, String myIP, int myPort, String nodeName,String kafkaIP,
             SimpMessagingTemplate simpMessagingTemplate) throws SocketException {
         programeStartedTime = System.currentTimeMillis();
         this.myIP = myIP;
         this.BSIP = BSIp;
+        this.kafkaIP = kafkaIP;
         this.myPort = myPort;
         this.BSPort = BSPort;
         UDPsocket = new DatagramSocket(this.myPort);
@@ -134,7 +137,7 @@ public class Server extends Thread {
             gossipSender.start();
             System.out.println("Server Thread: Gossip Sender started");
             
-            KafkaProducer kafkaProducer = new KafkaProducer(myNode, routingTable, running);
+            KafkaProducer kafkaProducer = new KafkaProducer(kafkaIP,myNode, routingTable, running);
             kafkaProducer.start();
             System.out.println("Server Thread: Kafka producer started");
             
@@ -142,7 +145,7 @@ public class Server extends Thread {
                     BSPort, routingTable);
             heartBeatSender.start();
             System.out.println("Server Thread: Heart Beat Sender started");
-            kafkaLogger = new KafkaLogger(running);
+            kafkaLogger = new KafkaLogger(kafkaIP,running);
             
             System.out.println("Server Thread: Kafka logger started");
             
@@ -166,7 +169,7 @@ public class Server extends Thread {
         while (running) {
             System.out.println("Server Thread:Server inside the running loop");
             executionTime = System.currentTimeMillis();
-            if ((executionTime - programeStartedTime) / 1000 > 12000) {
+            if ((executionTime - programeStartedTime) / 1000 > 12000000) {
                 System.out.println("Server Thread: More than 10 minutes since the start");
                 List<Node> nodes = routingTable.stream().filter(Node::isJoined).collect(Collectors.toList());
                 if (nodes.size() < 2) {
@@ -216,7 +219,7 @@ public class Server extends Thread {
                     break;
                     
                 }
-                System.out.println("Server Thread:Not JOIN messeage Packet ");
+                //System.out.println("Server Thread:Not JOIN messeage Packet ");
                 whoseResponse = checkForSearchResponseMessage(request);
                 if (whoseResponse) {
                     
@@ -225,11 +228,12 @@ public class Server extends Thread {
                             new SearcheResponseAcceptor(packetCount, routingTable, previousSearchResponses, myNode,
                                     searchResult, request));
                     System.out.println("Server Thread: One Search Response Acceptor started");
+                    kafkaLogger.log(myIdForDisplay, "SEROK");
                     break;
                     
                 }
                 
-                System.out.println("Server Thread:Not SEROK message");
+                //System.out.println("Server Thread:Not SEROK message");
                 whoseResponse = checkForSearchRequestMessage(request);
                 if (whoseResponse) {
                     System.out.println("Server Thread:SER messeage Packet to be handled by SEARCH Request handler ");
@@ -237,21 +241,21 @@ public class Server extends Thread {
                             new SearchRequestAcceptor(packetCount, this.UDPsocket, routingTable, fileNames, myNode, request,
                                     false, previousSearchRequsts, searchResult));
                     System.out.println("Server Thread: One Search Request Acceptor started");
-                    kafkaLogger.log(myIdForDisplay, "SEROK");
+                    kafkaLogger.log(myIdForDisplay, "SER");
                     break;
                 }
                 
-                System.out.println("Server Thread:Not SER message");
+               // System.out.println("Server Thread:Not SER message");
                 whoseResponse = checkForGossipRequestMessage(request);
                 if (whoseResponse) {
                     System.out.println("Server Thread:GOSSIP messeage Packet to be handled by GOSSIP handler ");
                     this.threadPool.execute(new GossipAcceptor(routingTable, myNode, request));
                     System.out.println("Server Thread: One GOSSIP handler started");
-                    kafkaLogger.log(myIdForDisplay, "SER");
+                    kafkaLogger.log(myIdForDisplay, "GOSSIP");
                     break;
                 }
                 
-                System.out.println("Server Thread:Not GOSSIP message");
+                //System.out.println("Server Thread:Not GOSSIP message");
                 whoseResponse = checkForHeartBeatMessage(request);
                 if (whoseResponse) {
                     System.out.println("Server Thread:HeartBeat messeage Packet to be handled by HeartBeat handler ");
@@ -270,11 +274,11 @@ public class Server extends Thread {
                     break;
                 }
                 
-                System.out.println("Server Thread:Not LEAVE request message");
+                //System.out.println("Server Thread:Not LEAVE request message");
                 System.out.println("Server Thread: Couldn't Figure Out the handler for message " + request);
                 whoseResponse = true;
             }
-            System.out.println("Server Thread:Clear the buffer after every message");
+           // System.out.println("Server Thread:Clear the buffer after every message");
             buf = new byte[256];
         }
         System.out.println("Server Thread:Server interrupted, Exiting");
@@ -284,7 +288,6 @@ public class Server extends Thread {
     }
     
     public void submitSearchRequest(String keyword) {
-        searchResult.reset();
         commandAcceptor.submitSearchRequest(keyword);
     }
     
@@ -328,52 +331,52 @@ public class Server extends Thread {
     
     private boolean checkForJoinResponseMessage(String request) {
         
-        System.out.println("Server Thread:checking for JOINOK response" + request);
+       // System.out.println("Server Thread:checking for JOINOK response" + request);
         if (request.contains("JOINOK")) {
             return true;
             
         }
-        System.out.println("Server Thread:checking for JOINOK response failed" + request);
+        //System.out.println("Server Thread:checking for JOINOK response failed" + request);
         return false;
     }
     
     private boolean checkForJoinRequestMessage(String request) {
         
-        System.out.println("Server Thread:checking for JOIN request" + request);
+        //System.out.println("Server Thread:checking for JOIN request" + request);
         if (request.contains("JOIN")) {
             return true;
         }
-        System.out.println("Server Thread:checking for JOIN response failed" + request);
+        //System.out.println("Server Thread:checking for JOIN response failed" + request);
         return false;
     }
     
     private boolean checkForGossipRequestMessage(String request) {
         
-        System.out.println("Server Thread:checking for gossip request" + request);
+        //System.out.println("Server Thread:checking for gossip request" + request);
         return request.contains("GOSSIP");
     }
     
     private boolean checkForSearchRequestMessage(String request) {
         
-        System.out.println("Server Thread:checking for search request" + request);
+        //System.out.println("Server Thread:checking for search request" + request);
         return request.contains("SER");
     }
     
     private boolean checkForSearchResponseMessage(String request) {
         
-        System.out.println("Server Thread:checking for search response" + request);
+        //System.out.println("Server Thread:checking for search response" + request);
         return request.contains("SEROK");
     }
     
     private boolean checkForHeartBeatMessage(String request) {
         
-        System.out.println("Server Thread:checking for HeartBeat" + request);
+        //System.out.println("Server Thread:checking for HeartBeat" + request);
         return request.contains("HEARTBEAT");
     }
     
     public boolean checkForLeaveRequestMessage(String request) {
         
-        System.out.println("Server Thread:checking for Leave" + request);
+        //System.out.println("Server Thread:checking for Leave" + request);
         if (request.contains("LEAVEOK")) {
             return false;
         } else if (request.contains("LEAVE")) {

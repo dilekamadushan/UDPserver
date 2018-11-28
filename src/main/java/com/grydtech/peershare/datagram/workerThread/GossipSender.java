@@ -40,7 +40,7 @@ public class GossipSender extends Thread {
                 
                 try {
                     System.out.println("Gossip Sender:Gossip thread sleep for 120 seconds ");
-                    Thread.sleep(1000 * 60*3);
+                    Thread.sleep(1000 * 60 * 1);
                 }
                 catch (InterruptedException e) {
                     e.printStackTrace();
@@ -51,10 +51,10 @@ public class GossipSender extends Thread {
                 System.out.println("Gossip Sender:Starting to send the gossip message to all nodes");
                 for (Node node : routingTable) {
                     try {
-                        if (!Objects.equals(node.getIpString(), myNode.getIpString())) {
+                        if (node.isStatus() && (!Objects.equals(node.getIpString(), myNode.getIpString()))) {
                             sendGossip(node);
                             System.out.println("Gossip Sender:Gossip message sent to " + node.toString());
-                        } else if (node.getPort() != myNode.getPort()) {
+                        } else if (node.isStatus() && node.getPort() != myNode.getPort()) {
                             sendGossip(node);
                             System.out.println("Gossip Sender:Gossip message sent to " + node.toString());
                             
@@ -81,11 +81,11 @@ public class GossipSender extends Thread {
     }
     
     private void sendGossip(Node node) throws IOException {
-        System.out.println("Gossip Sender:inside send gossip method " + node.toString() + " " + node.getIpString());
+        //System.out.println("Gossip Sender:inside send gossip method " + node.toString() + " " + node.getIpString());
         String msg = getFullMessage(
                 "GOSSIP " + myNode.getIpString() + " " + myNode.getPort() + " " + myNode.getNodeName() + getGossipMessage());
         bufToSend = msg.getBytes();
-        System.out.println("Gossip Sender:Gossip Message:" + msg);
+        //System.out.println("Gossip Sender:Gossip Message:" + msg);
         DatagramPacket nodeDatagramPacket = new DatagramPacket(bufToSend, bufToSend.length,
                 InetAddress.getByAddress(node.getIp()), node.getPort());
         threadDatagramSocket.send(nodeDatagramPacket);

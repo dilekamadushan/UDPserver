@@ -46,6 +46,8 @@ public class HttpController {
         InputStreamResource inputStreamResource = new InputStreamResource(new FileInputStream(file));
 
         String hash = DigestUtils.sha1Hex(new FileInputStream(file));
+    
+        System.out.println("Generated file"+fileName+" checksum value (sha hash):"+ hash);
 
         LOGGER.info("generated file checksum value (hash): \"{}\"", hash);
 

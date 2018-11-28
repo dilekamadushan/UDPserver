@@ -63,7 +63,7 @@ public class GossipAcceptor extends Thread {
                     //member.setJoined(true);
                     member.setStatus(true);
                     if (Objects.equals(member.getDiscoveredBy(), "")) {
-                        member.setDiscoveredBy("From search request " + gossipMessage);
+                        member.setDiscoveredBy("From gossip request " + gossipMessage);
                     }
                 }
             }

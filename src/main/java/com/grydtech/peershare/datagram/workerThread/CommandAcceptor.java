@@ -44,6 +44,8 @@ public class CommandAcceptor extends Thread {
     
     private boolean running;
     
+    private int searchRequestId =0;
+    
     public CommandAcceptor(boolean running, DatagramSocket socket, CopyOnWriteArrayList<Node> routingTable,
             SearchResult searchResult, CopyOnWriteArrayList<String> fileNames, Node myNode,
             CopyOnWriteArrayList<String> previousSearchRequests, CopyOnWriteArrayList<String> previousSearchResponses,
@@ -96,6 +98,10 @@ public class CommandAcceptor extends Thread {
                 case "lsFiles":
                     System.out.println("Search Query Acceptor :The files in this node are:");
                     fileNames.forEach(System.out::println);
+                    break;
+                case "lsMyInfo":
+                    System.out.println("Search Query Acceptor :Printing self info:");
+                    System.out.println(myNode.toString());
                     break;
                 case "lsSearchResult":
                     System.out.println("Search Query Acceptor :The searchResult status now: " + searchResult.toString());
@@ -155,18 +161,19 @@ public class CommandAcceptor extends Thread {
     }
     
     public void submitSearchRequest(String keyword) {
-        if (!searchResult.isInUse()) {
-            System.out.println("Search Query Acceptor: accepted query: " + keyword);
+            System.out.println("Search Query Acceptor: accepted query: " + keyword+" resetting search results");
+            searchResult.reset();
+            previousSearchRequests.removeAll(previousSearchRequests);
+            previousSearchResponses.removeAll(previousSearchResponses);
             searchResult.setQuery(keyword);
             searchResult.setInUse(true);
             executorService.execute(
                     new SearchRequestAcceptor(packetCount, this.datagramSocket, routingTable, fileNames, myNode,
-                            getFullMessage("SER " + myNode.getIpString() + " " + myNode.getPort() + " " + keyword + " 0"),
+                            getFullMessage("SER " + myNode.getIpString() + " " + myNode.getPort() + " " + keyword +" "+searchRequestId+" 0"),
                             true, previousSearchRequests, searchResult));
             System.out.println("Search Query Acceptor : created a SearchRequestAcceptor thread");
-        } else {
-            System.out.println("Please wait until previous search ends");
-        }
+            searchRequestId+=1;
+       
     }
     
     private String getFullMessage(String message) {

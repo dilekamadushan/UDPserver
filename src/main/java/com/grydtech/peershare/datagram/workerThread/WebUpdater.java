@@ -51,7 +51,7 @@ public class WebUpdater extends Thread {
             Node node = searchResult.getNodes().get(i);
             String fileName = searchResult.getFileNames().get(i);
             String fileId = generateBase64(fileName);
-            String fileUrl = String.format("http://%s:%d/download/%s", node.getIpString(), node.getPort(), fileId);
+            String fileUrl = String.format("http://%s:%d/download/%s", node.getIpString(), node.getPort() - 10000, fileId);
             
             results.add(new FileWrapper(fileId, fileName, fileUrl));
         }

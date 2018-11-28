@@ -25,10 +25,13 @@ public class PeerShareApplication {
     private String serverHost;
 
     @Value("${server.port}")
-    private int serverPort;
+    private int httpPort;
 
     @Value("${server.name}")
     private String serverName;
+    
+    @Value("${kafka.host}")
+    private String kafkaHost;
 
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final Server server;
@@ -42,7 +45,7 @@ public class PeerShareApplication {
     @EventListener
     public void afterApplicationReady(ApplicationReadyEvent event) {
         try {
-            server.initServer(bootstrapHost, bootstrapPort, serverHost, serverPort, serverName, simpMessagingTemplate);
+            server.initServer(bootstrapHost, bootstrapPort, serverHost, httpPort + 10000, serverName, kafkaHost,simpMessagingTemplate);
             System.out.println("Starter: started successfully");
             server.start();
             Thread.sleep(20 * 100000);

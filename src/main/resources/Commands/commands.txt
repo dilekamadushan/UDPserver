@@ -6,4 +6,4 @@ search man
 lsNodesFound
 lsNodesSpecial
 lsSearchRequests
-
+lsSearchResult

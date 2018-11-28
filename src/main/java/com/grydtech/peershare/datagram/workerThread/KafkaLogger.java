@@ -21,11 +21,13 @@ public class KafkaLogger {
     
     private String topic = "sample-log";
     
+    
     private TestCallback testCallback;
     
-    public KafkaLogger(boolean running) {
+    public KafkaLogger(String kafkaIP,boolean running) {
         //run the program with args: producer/consumer broker:port
-        String brokers = "139.59.77.98:9092";
+        //String brokers = "139.59.77.98:9092";
+        String brokers = kafkaIP+":9092";
         
         Properties props = new Properties();
         
@@ -53,9 +55,9 @@ public class KafkaLogger {
         long startTime = System.currentTimeMillis();
         producer.send(data, testCallback);
         long elapsedTime = System.currentTimeMillis() - startTime;
-        System.out.println("Kafka Logger:Sent this edge: " + jo + " in " + elapsedTime + " ms");
+       // System.out.println("Kafka Logger:Sent this edge: " + jo + " in " + elapsedTime + " ms");
         
-        System.out.println("Done");
+        //System.out.println("Done");
         producer.flush();
     }
     
@@ -83,12 +85,12 @@ public class KafkaLogger {
         @Override
         public void onCompletion(RecordMetadata recordMetadata, Exception e) {
             if (e != null) {
-                System.out.println("Error while producing message to topic :" + recordMetadata);
+                //System.out.println("Error while producing message to topic :" + recordMetadata);
                 e.printStackTrace();
             } else {
-                String message = String.format("sent message to topic:%s partition:%s  offset:%s", recordMetadata.topic(),
-                        recordMetadata.partition(), recordMetadata.offset());
-                System.out.println(message);
+                //String message = String.format("sent message to topic:%s partition:%s  offset:%s", recordMetadata.topic(),
+                       // recordMetadata.partition(), recordMetadata.offset());
+                //System.out.println(message);
             }
         }
     }
