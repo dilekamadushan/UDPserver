@@ -51,7 +51,7 @@ public class KafkaProducer extends Thread {
         while (running) {
             try {
                 //System.out.println("Kafka Producer:Kafka producer sleeps  for 120 seconds ");
-                Thread.sleep(1000 * 5);
+                Thread.sleep(1000);
                 //System.out.println("Kafka Producer:Kafka producer wakes ");
                 produce();
             }

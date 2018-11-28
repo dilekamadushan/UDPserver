@@ -186,7 +186,7 @@ public class RegisterAndJoinMessenger {
     public boolean sendJoin() throws IOException {
         System.out.println("Register and Join Messenger:Inside Send Join method");
         
-        if (toJoinNodes.size() <= 3) {
+        if (toJoinNodes.size() <= 2) {
             System.out.println("Register and Join Messenger:Inside Send Join method and sending Join message to all nodes "
                     + toJoinNodes.size());
             ArrayList<Node> nodes = toJoinNodes;
@@ -217,7 +217,7 @@ public class RegisterAndJoinMessenger {
                 }
             }
             return true;
-        } else if (toJoinNodes.size() > 3) {
+        } else if (toJoinNodes.size() > 2) {
             Node node;
             for (int i = 0; i < 2; i++) {
                 node = toJoinNodes.get(ThreadLocalRandom.current().nextInt(0, toJoinNodes.size()));
