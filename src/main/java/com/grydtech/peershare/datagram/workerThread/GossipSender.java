@@ -34,18 +34,18 @@ public class GossipSender extends Thread {
     }
     
     public void run() {
-        System.out.println("Gossip Sender:Entering the gossip sending loop");
+        //System.out.println("Gossip Sender:Entering the gossip sending loop");
         while (running) {
             if (routingTable.size() > 0) {
                 
                 try {
-                    System.out.println("Gossip Sender:Gossip thread sleep for 120 seconds ");
+                    //System.out.println("Gossip Sender:Gossip thread sleep for 120 seconds ");
                     Thread.sleep(1000 * 60 * 1);
                 }
                 catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                System.out.println("Gossip Sender:Gossip thread wakes up");
+                //System.out.println("Gossip Sender:Gossip thread wakes up");
                 
                 System.out.println("Gossip Sender: Routing table size:" + routingTable.size());
                 System.out.println("Gossip Sender:Starting to send the gossip message to all nodes");
@@ -89,7 +89,7 @@ public class GossipSender extends Thread {
         DatagramPacket nodeDatagramPacket = new DatagramPacket(bufToSend, bufToSend.length,
                 InetAddress.getByAddress(node.getIp()), node.getPort());
         threadDatagramSocket.send(nodeDatagramPacket);
-        System.out.println("Gossip Sender:Gossip Message sent to " + node.getIpString() + " " + node.getPort() + " " + msg);
+        //System.out.println("Gossip Sender:Gossip Message sent to " + node.getIpString() + " " + node.getPort() + " " + msg);
     }
     
     private String getFullMessage(String message) {

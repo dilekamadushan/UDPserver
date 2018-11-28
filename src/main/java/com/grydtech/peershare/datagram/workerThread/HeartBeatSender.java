@@ -47,7 +47,7 @@ public class HeartBeatSender extends Thread {
     }
     
     public void run() {
-        System.out.println("Heart-Beat Sender:Entering the Heart-Beat sending loop");
+       // System.out.println("Heart-Beat Sender:Entering the Heart-Beat sending loop");
         long start = System.currentTimeMillis();
         while (running) {
             List<Node> joinedNodes = routingTable.stream().filter(Node::isJoined).collect(Collectors.toList());
@@ -72,7 +72,7 @@ public class HeartBeatSender extends Thread {
                             if (!(Objects.equals(node.getIpString(), myNode.getIpString()) && node.getPort() == myNode
                                     .getPort())) {
                                 sendHeartBeat(node);
-                                System.out.println("HeartBeat Sender:HeartBeat message sent to " + node.getIpString());
+                                //System.out.println("HeartBeat Sender:HeartBeat message sent to " + node.getIpString());
                                 
                             }
                         }
@@ -110,7 +110,7 @@ public class HeartBeatSender extends Thread {
     }
     
     private void sendHeartBeat(Node node) throws IOException {
-        System.out.println("HeartBeat Sender:inside send Heart Beat method ");
+       // System.out.println("HeartBeat Sender:inside send Heart Beat method ");
         String msg = getFullMessage("HEARTBEAT " + myNode.getIpString() + " " + myNode.getPort());
         bufToSend = msg.getBytes();
         System.out.println("HeartBeat Sender:HeartBeat Message:" + msg);
@@ -118,7 +118,7 @@ public class HeartBeatSender extends Thread {
                 InetAddress.getByAddress(node.getIp()), node.getPort());
         threadDatagramSocket.send(nodeDatagramPacket);
         node.increaseRetries();
-        System.out.println("HeartBeat Sender:HeartBeat Message sent to " + node.toString());
+        System.out.println("HeartBeat Sender:HeartBeat Message sent to " + node.toString()+" "+msg);
     }
     
     private String getFullMessage(String message) {

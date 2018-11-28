@@ -71,11 +71,5 @@ public class GossipAcceptor extends Thread {
             System.out.println("Gossip Acceptor:Failed Problem in parsing gossip message:" + gossipMessage);
         }
         
-        System.out.println("Gossip Acceptor: Printing the routing table");
-        for (Node peer : routingTable) {
-            System.out.println("Gossip Acceptor: " + peer.toString());
-            
-        }
-        
     }
 }

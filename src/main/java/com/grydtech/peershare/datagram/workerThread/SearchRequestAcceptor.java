@@ -164,7 +164,7 @@ public class SearchRequestAcceptor implements Runnable {
                                     System.out.println(
                                             packetCount + "SearchRequestAcceptor: sent the second udp burst" + node
                                                     .toString() + " " + params[2] + " " + params[3]);
-                                } else {
+                                } else if(node.isStatus()) {
                                     sendSearchRequest(node, Integer.parseInt(params[params.length - 1]) + random.nextInt(3),
                                             params[2], params[3], searchRequest.toString());
                                     System.out.println(
@@ -204,7 +204,7 @@ public class SearchRequestAcceptor implements Runnable {
                                         System.out.println(
                                                 packetCount + "SearchRequestAcceptor: sent the second udp burst" + node
                                                         .toString() + " " + params[2] + " " + params[3]);
-                                    } else {
+                                    } else if (node.isStatus()){
                                         sendSearchRequest(node,
                                                 Integer.parseInt(params[params.length - 1]) + random.nextInt(3), params[2],
                                                 params[3], searchRequest.toString());
