@@ -74,7 +74,9 @@ public class CommandAcceptor extends Thread {
         Scanner reader = new Scanner(System.in);  // Reading from System.in
         while (running) {
             
-            System.out.println("Search Query Acceptor :Enter a search query: ");
+            //
+            // 
+            // System.out.println("Search Query Acceptor :Enter a search query: ");
             String query = reader.nextLine(); // Scans the next token of the input as a string.
             switch (query) {
                 case "lsNodesJoined":
