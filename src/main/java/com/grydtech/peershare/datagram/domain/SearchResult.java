@@ -67,7 +67,11 @@ public class SearchResult {
     public ArrayList<Node> getNodes() {
         return nodes;
     }
-    
+
+    public ArrayList<String> getSearchHops() {
+        return searchHops;
+    }
+
     public void setQuery(String query) {
         this.query =query;
     }

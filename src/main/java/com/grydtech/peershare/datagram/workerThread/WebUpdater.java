@@ -50,8 +50,9 @@ public class WebUpdater extends Thread {
             String fileName = searchResult.getFileNames().get(i);
             String fileId = generateBase64(fileName);
             String fileUrl = String.format("http://%s:%d/download/%s", node.getIpString(), node.getPort() - 10000, fileId);
+            int hops = Integer.parseInt(searchResult.getSearchHops().get(i));
             
-            results.add(new FileWrapper(fileId, fileName, fileUrl));
+            results.add(new FileWrapper(fileId, fileName, fileUrl, hops));
         }
         
         simpMessagingTemplate.convertAndSend("/topic/results", new SearchResponse(results));
