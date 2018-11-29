@@ -11,6 +11,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
@@ -44,12 +45,14 @@ public class CommandAcceptor extends Thread {
     
     private boolean running;
     
-    private int searchRequestId =0;
+    private int searchRequestId = 0;
+    
+    private int hopsCount = 7;
     
     public CommandAcceptor(boolean running, DatagramSocket socket, CopyOnWriteArrayList<Node> routingTable,
             SearchResult searchResult, CopyOnWriteArrayList<String> fileNames, Node myNode,
             CopyOnWriteArrayList<String> previousSearchRequests, CopyOnWriteArrayList<String> previousSearchResponses,
-            int packetCount, String BSIP, int BSport, ExecutorService executorService) {
+            int packetCount, int hopsCount, String BSIP, int BSport, ExecutorService executorService) {
         this.executorService = executorService;
         this.routingTable = routingTable;
         this.datagramSocket = socket;
@@ -59,6 +62,7 @@ public class CommandAcceptor extends Thread {
         this.previousSearchRequests = previousSearchRequests;
         this.previousSearchResponses = previousSearchResponses;
         this.packetCount = packetCount;
+        this.hopsCount=hopsCount;
         this.BSIP = BSIP;
         this.BSport = BSport;
         this.running = running;
@@ -148,10 +152,14 @@ public class CommandAcceptor extends Thread {
                                         .substring(7));
                         submitSearchRequest(query.substring(7));
                     } else if (query.length() > 8 && "addFile".equals(query.substring(0, 7))) {
-                        System.out.println("Search Query Acceptor : User requested to add a File:" + query.substring(7));
-                        fileNames.add(query.substring(7));
+                        System.out.println("Search Query Acceptor : User requested to add a File:" + query.substring(8));
+                        fileNames.add(query.substring(8));
+                    } else if (query.length() > 8 && "setHops".equals(query.substring(0, 7))) {
+                        System.out.println("Search Query Acceptor : User has requested to reset hops:" + query.substring(8));
+                        hopsCount = Integer.parseInt(query.substring(8));
                     } else {
                         System.out.println("Search Query Acceptor : unidentified query:" + query);
+                        
                     }
                 
             }
@@ -161,19 +169,25 @@ public class CommandAcceptor extends Thread {
     }
     
     public void submitSearchRequest(String keyword) {
-            System.out.println("Search Query Acceptor: accepted query: " + keyword+" resetting search results");
+        System.out.println("Search Query Acceptor: accepted query: " + keyword + " resetting search results");
+        if (!Objects.equals("", keyword)) {
             searchResult.reset();
             previousSearchRequests.removeAll(previousSearchRequests);
             previousSearchResponses.removeAll(previousSearchResponses);
             searchResult.setQuery(keyword);
             searchResult.setInUse(true);
             executorService.execute(
-                    new SearchRequestAcceptor(packetCount, this.datagramSocket, routingTable, fileNames, myNode,
-                            getFullMessage("SER " + myNode.getIpString() + " " + myNode.getPort() + " " + keyword +" "+searchRequestId+" 0"),
-                            true, previousSearchRequests, searchResult));
+                    new SearchRequestAcceptor(packetCount, hopsCount, this.datagramSocket, routingTable, fileNames, myNode,
+                            getFullMessage("SER " + myNode.getIpString() + " " + myNode.getPort() + " " + keyword + " "
+                                    + searchRequestId + " 0"), true, previousSearchRequests, searchResult));
             System.out.println("Search Query Acceptor : created a SearchRequestAcceptor thread");
-            searchRequestId+=1;
-       
+            searchRequestId += 1;
+        } else {
+            System.out.println("Search Query Acceptor: accepted query: " + keyword
+                    + " User has entered empty query, terminating search result");
+            
+        }
+        
     }
     
     private String getFullMessage(String message) {

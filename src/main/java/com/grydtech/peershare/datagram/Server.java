@@ -91,6 +91,8 @@ public class Server extends Thread {
     
     private CommandAcceptor commandAcceptor;
     
+    private int hopsCount=7;
+    
     public void initServer(String BSIp, int BSPort, String myIP, int myPort, String nodeName,String kafkaIP,
             SimpMessagingTemplate simpMessagingTemplate) throws SocketException {
         programeStartedTime = System.currentTimeMillis();
@@ -130,7 +132,7 @@ public class Server extends Thread {
             fileNames = getFile("Files/fileNames.txt");
             System.out.println("Server Thread: No of files is:" + fileNames.size());
             commandAcceptor = new CommandAcceptor(running, UDPsocket, routingTable, searchResult, fileNames, myNode,
-                    previousSearchRequsts, previousSearchResponses, packetCount, BSIP, BSPort, threadPool);
+                    previousSearchRequsts, previousSearchResponses, packetCount,hopsCount, BSIP, BSPort, threadPool);
             commandAcceptor.start();
             System.out.println("Server Thread: Query acceptor started");
             GossipSender gossipSender = new GossipSender(running, UDPsocket, myNode, routingTable);
@@ -238,7 +240,7 @@ public class Server extends Thread {
                 if (whoseResponse) {
                     System.out.println("Server Thread:SER messeage Packet to be handled by SEARCH Request handler ");
                     this.threadPool.execute(
-                            new SearchRequestAcceptor(packetCount, this.UDPsocket, routingTable, fileNames, myNode, request,
+                            new SearchRequestAcceptor(packetCount,hopsCount, this.UDPsocket, routingTable, fileNames, myNode, request,
                                     false, previousSearchRequsts, searchResult));
                     System.out.println("Server Thread: One Search Request Acceptor started");
                     kafkaLogger.log(myIdForDisplay, "SER");

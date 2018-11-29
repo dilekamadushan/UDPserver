@@ -22,12 +22,12 @@ public class HeartBeatRequestAcceptor extends Thread {
         this.routingTable = routingTable;
         this.request = request;
         this.myNode = myNode;
-        System.out.println(" HeartBeatRequestAcceptor:Thread started " + request);
+        //System.out.println(" HeartBeatRequestAcceptor:Thread started " + request);
     }
     
     public void run() {
         String[] params = request.split(" ");
-        System.out.println(" HeartBeatRequestAcceptor: " + params[2]);
+        //System.out.println(" HeartBeatRequestAcceptor: " + params[2]);
         
         Node node = routingTable.stream()
                 .filter(s -> Objects.equals(s.getIpString(), params[2]) && s.getPort() == Integer.parseInt(params[3]))
@@ -37,7 +37,7 @@ public class HeartBeatRequestAcceptor extends Thread {
             if (Objects.equals(node.getDiscoveredBy(), "")) {
                 node.setDiscoveredBy("From Heart Beat" + request);
             }
-            System.out.println("HeartBeatRequestAcceptor:heart beat message processed " + node.toString());
+           // System.out.println("HeartBeatRequestAcceptor:heart beat message processed " + node.toString());
         } else if (!(Objects.equals(myNode.getIpString(), params[2]) && myNode.getPort() == Integer.parseInt(params[3]))) {
             System.out.println(
                     "HeartBeatRequestAcceptor:The node who sent message: " + request + " is not in the routing table");

@@ -7,3 +7,5 @@ lsNodesFound
 lsNodesSpecial
 lsSearchRequests
 lsSearchResult
+java -Dbootstrap.host=192.168.8.105 -Dbootstrap.port=1111 -Dserver.host=192.168.8.105 -Dserver.port=2223 -Dserver.name=cdileka  -jar udp-server-1.0-SNAPSHOT.jar
+

@@ -53,16 +53,16 @@ public class HeartBeatSender extends Thread {
             List<Node> joinedNodes = routingTable.stream().filter(Node::isJoined).collect(Collectors.toList());
             if (registerAndJoinMessenger.registeredIndex < 4 || joinedNodes.size() > 1) {
                 try {
-                    System.out.println("HeartBeat Sender:HeartBeat thread sleep for 120 seconds:"
-                            + registerAndJoinMessenger.registeredIndex);
+                   // System.out.println("HeartBeat Sender:HeartBeat thread sleep for 120 seconds:"
+                         //   + registerAndJoinMessenger.registeredIndex);
                     Thread.sleep(1000 * 60 * 2);
                 }
                 catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                System.out.println("HeartBeat Sender:HeartBeat thread wakes up");
-                System.out.println("Heart-Beat Sender: Routing table size:" + routingTable.size());
-                System.out.println("HeartBeat Sender:Starting to send the Heart-Beat message to all nodes");
+              //  System.out.println("HeartBeat Sender:HeartBeat thread wakes up");
+              //  System.out.println("Heart-Beat Sender: Routing table size:" + routingTable.size());
+              //  System.out.println("HeartBeat Sender:Starting to send the Heart-Beat message to all nodes");
                 for (Node node : routingTable) {
                     try {
                         if (node.getRetries() == 3) {
@@ -118,7 +118,7 @@ public class HeartBeatSender extends Thread {
                 InetAddress.getByAddress(node.getIp()), node.getPort());
         threadDatagramSocket.send(nodeDatagramPacket);
         node.increaseRetries();
-        System.out.println("HeartBeat Sender:HeartBeat Message sent to " + node.toString()+" "+msg);
+       // System.out.println("HeartBeat Sender:HeartBeat Message sent to " + node.toString()+" "+msg);
     }
     
     private String getFullMessage(String message) {

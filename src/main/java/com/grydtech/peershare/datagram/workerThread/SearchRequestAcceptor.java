@@ -11,7 +11,6 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -41,8 +40,9 @@ public class SearchRequestAcceptor implements Runnable {
     private CopyOnWriteArrayList<String> previousSearchRequests;
     
     private String requestId;
+    private int hopsCount=7;
     
-    public SearchRequestAcceptor(int packetCount, DatagramSocket socket, CopyOnWriteArrayList<Node> routingTable,
+    public SearchRequestAcceptor(int packetCount, int hopsCount,DatagramSocket socket, CopyOnWriteArrayList<Node> routingTable,
             CopyOnWriteArrayList<String> fileNames, Node myNode, String request, Boolean isHomeMade,
             CopyOnWriteArrayList<String> previousSearchRequests, SearchResult searchResult) {
         
@@ -55,6 +55,7 @@ public class SearchRequestAcceptor implements Runnable {
         this.searchResult = searchResult;
         this.previousSearchRequests = previousSearchRequests;
         this.packetCount = packetCount;
+        this.hopsCount=hopsCount;
         System.out.println(
                 packetCount + " SearchRequestAcceptor:Thread started:" + System.currentTimeMillis() / 1000 + request);
     }
@@ -74,12 +75,12 @@ public class SearchRequestAcceptor implements Runnable {
             System.out.println(packetCount + "SearchRequestAcceptor :" + System.currentTimeMillis() + request
                     + " is a new search request");
             System.out.println(packetCount + "SearchRequestAcceptor : no.of hops:" + params[params.length - 1]);
-            if (7 < Integer.parseInt(hops)) {
+            if (hopsCount < Integer.parseInt(hops)) {
                 System.out.println(packetCount + "SearchRequestAcceptor:Number of hops is greater than 7: " + params[6]);
                 System.out.println(packetCount + "SearchRequestAcceptor:The request is dropped");
                 
             } else {
-                System.out.println(packetCount + "SearchRequestAcceptor:The no.of hops <=7");
+                System.out.println(packetCount + "SearchRequestAcceptor:The no.of hops <="+hopsCount);
                 searchQuery = new StringBuilder();
                 searchRequest = new StringBuilder();
                 for (int i = 4; i < params.length - 2; i++) {
@@ -141,8 +142,7 @@ public class SearchRequestAcceptor implements Runnable {
                     
                 }
                 System.out.println(packetCount + "SearchRequestAcceptor:Finished dealing with filenames");
-                if (8 > Integer.parseInt(hops)) {
-                    Random random = new Random();
+                if (hopsCount > Integer.parseInt(hops)) {
                     System.out.println(packetCount + "SearchRequestAcceptor:Trying to send search request for other nodes");
                     for (Node node : routingTable) {
                         try {
@@ -165,7 +165,7 @@ public class SearchRequestAcceptor implements Runnable {
                                             packetCount + "SearchRequestAcceptor: sent the second udp burst" + node
                                                     .toString() + " " + params[2] + " " + params[3]);
                                 } else if(node.isStatus()) {
-                                    sendSearchRequest(node, Integer.parseInt(params[params.length - 1]) + random.nextInt(3),
+                                    sendSearchRequest(node, Integer.parseInt(params[params.length - 1]) + 1,
                                             params[2], params[3], searchRequest.toString());
                                     System.out.println(
                                             packetCount + "SearchRequestAcceptor: sent the search request" + node.toString()
@@ -175,7 +175,7 @@ public class SearchRequestAcceptor implements Runnable {
                                     
                                     Thread.sleep(500);
                                     
-                                    sendSearchRequest(node, Integer.parseInt(params[params.length - 1]) + random.nextInt(3),
+                                    sendSearchRequest(node, Integer.parseInt(params[params.length - 1]) + 1,
                                             params[2], params[3], searchRequest.toString());
                                     System.out.println(
                                             packetCount + "SearchRequestAcceptor: sent the second udp burst" + node
@@ -206,7 +206,7 @@ public class SearchRequestAcceptor implements Runnable {
                                                         .toString() + " " + params[2] + " " + params[3]);
                                     } else if (node.isStatus()){
                                         sendSearchRequest(node,
-                                                Integer.parseInt(params[params.length - 1]) + random.nextInt(3), params[2],
+                                                Integer.parseInt(params[params.length - 1]) + 1, params[2],
                                                 params[3], searchRequest.toString());
                                         System.out.println(
                                                 packetCount + "SearchRequestAcceptor: sent the search request" + node
@@ -217,7 +217,7 @@ public class SearchRequestAcceptor implements Runnable {
                                         Thread.sleep(500);
                                         
                                         sendSearchRequest(node,
-                                                Integer.parseInt(params[params.length - 1]) + random.nextInt(3), params[2],
+                                                Integer.parseInt(params[params.length - 1]) + 1, params[2],
                                                 params[3], searchRequest.toString());
                                         System.out.println(
                                                 packetCount + "SearchRequestAcceptor: sent the second udp burst" + node

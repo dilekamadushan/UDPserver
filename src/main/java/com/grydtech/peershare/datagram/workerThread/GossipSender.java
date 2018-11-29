@@ -30,7 +30,7 @@ public class GossipSender extends Thread {
         this.threadDatagramSocket = socket;
         this.routingTable = routingTable;
         this.running = running;
-        System.out.println("Gossip Sender: Thread started");
+        //System.out.println("Gossip Sender: Thread started");
     }
     
     public void run() {
@@ -53,10 +53,10 @@ public class GossipSender extends Thread {
                     try {
                         if (node.isStatus() && (!Objects.equals(node.getIpString(), myNode.getIpString()))) {
                             sendGossip(node);
-                            System.out.println("Gossip Sender:Gossip message sent to " + node.toString());
+                           // System.out.println("Gossip Sender:Gossip message sent to " + node.toString());
                         } else if (node.isStatus() && node.getPort() != myNode.getPort()) {
                             sendGossip(node);
-                            System.out.println("Gossip Sender:Gossip message sent to " + node.toString());
+                            //System.out.println("Gossip Sender:Gossip message sent to " + node.toString());
                             
                         }
                         
@@ -83,7 +83,7 @@ public class GossipSender extends Thread {
     private void sendGossip(Node node) throws IOException {
         //System.out.println("Gossip Sender:inside send gossip method " + node.toString() + " " + node.getIpString());
         String msg = getFullMessage(
-                "GOSSIP " + myNode.getIpString() + " " + myNode.getPort() + " " + myNode.getNodeName() + getGossipMessage());
+                "GOSSIP " + myNode.getIpString() + " " + myNode.getPort()  + getGossipMessage());
         bufToSend = msg.getBytes();
         //System.out.println("Gossip Sender:Gossip Message:" + msg);
         DatagramPacket nodeDatagramPacket = new DatagramPacket(bufToSend, bufToSend.length,
@@ -105,8 +105,7 @@ public class GossipSender extends Thread {
         StringBuilder msg = new StringBuilder("");
         
         for (Node node : routingTable) {
-            msg.append(" ").append(node.getIpString()).append(" ").append(node.getPort()).append(" ")
-                    .append(node.getNodeName());
+            msg.append(" ").append(node.getIpString()).append(" ").append(node.getPort());
         }
         
         return msg.toString();
