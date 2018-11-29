@@ -88,7 +88,7 @@ public class HeartBeatSender extends Thread {
                         System.out.println("HeartBeat Sender:HeartBeat message failed to " + node.toString());
                     }
                 }
-                System.out.println("HeartBeat Sender::" + registerAndJoinMessenger.registeredIndex);
+               // System.out.println("HeartBeat Sender::" + registerAndJoinMessenger.registeredIndex);
                 
             } else if (registerAndJoinMessenger.registeredIndex > 3 && joinedNodes.size() < 2 && (
                     ((System.currentTimeMillis() - start) / (1000 * 60)) > 5)) {
@@ -113,7 +113,7 @@ public class HeartBeatSender extends Thread {
        // System.out.println("HeartBeat Sender:inside send Heart Beat method ");
         String msg = getFullMessage("HEARTBEAT " + myNode.getIpString() + " " + myNode.getPort());
         bufToSend = msg.getBytes();
-        System.out.println("HeartBeat Sender:HeartBeat Message:" + msg);
+        //System.out.println("HeartBeat Sender:HeartBeat Message:" + msg);
         DatagramPacket nodeDatagramPacket = new DatagramPacket(bufToSend, bufToSend.length,
                 InetAddress.getByAddress(node.getIp()), node.getPort());
         threadDatagramSocket.send(nodeDatagramPacket);

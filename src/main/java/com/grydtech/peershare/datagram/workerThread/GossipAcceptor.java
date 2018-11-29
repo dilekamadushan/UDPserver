@@ -38,9 +38,9 @@ public class GossipAcceptor extends Thread {
                 
                // System.out.println("Gossip Acceptor:Inside the addTable method :" + hostList[i] + " " + hostList[i + 1] );
                 String[] ips = hostList[i].replace(".", " ").split(" ");
-                System.out.println(
-                        "Register and Join Messenger:" + Integer.parseInt(ips[0]) + " " + Integer.parseInt(ips[1]) + " "
-                                + Integer.parseInt(ips[2]) + " " + Integer.parseInt(ips[3]));
+               // System.out.println(
+                        //"Register and Join Messenger:" + Integer.parseInt(ips[0]) + " " + Integer.parseInt(ips[1]) + " "
+                             //   + Integer.parseInt(ips[2]) + " " + Integer.parseInt(ips[3]));
                 
                 Node node = new Node(new byte[] { (byte) Integer.parseInt(ips[0]), (byte) Integer.parseInt(ips[1]),
                         (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) },

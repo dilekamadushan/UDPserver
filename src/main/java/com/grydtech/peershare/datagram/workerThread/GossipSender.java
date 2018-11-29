@@ -47,8 +47,8 @@ public class GossipSender extends Thread {
                 }
                 //System.out.println("Gossip Sender:Gossip thread wakes up");
                 
-                System.out.println("Gossip Sender: Routing table size:" + routingTable.size());
-                System.out.println("Gossip Sender:Starting to send the gossip message to all nodes");
+               // System.out.println("Gossip Sender: Routing table size:" + routingTable.size());
+                //System.out.println("Gossip Sender:Starting to send the gossip message to all nodes");
                 for (Node node : routingTable) {
                     try {
                         if (node.isStatus() && (!Objects.equals(node.getIpString(), myNode.getIpString()))) {

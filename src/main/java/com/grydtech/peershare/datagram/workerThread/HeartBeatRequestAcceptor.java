@@ -39,8 +39,8 @@ public class HeartBeatRequestAcceptor extends Thread {
             }
            // System.out.println("HeartBeatRequestAcceptor:heart beat message processed " + node.toString());
         } else if (!(Objects.equals(myNode.getIpString(), params[2]) && myNode.getPort() == Integer.parseInt(params[3]))) {
-            System.out.println(
-                    "HeartBeatRequestAcceptor:The node who sent message: " + request + " is not in the routing table");
+           // System.out.println(
+                   // "HeartBeatRequestAcceptor:The node who sent message: " + request + " is not in the routing table");
             String[] ips = params[2].replace(".", " ").split(" ");
             node = new Node(new byte[] { (byte) Integer.parseInt(ips[0]), (byte) Integer.parseInt(ips[1]),
                     (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, Integer.parseInt(params[3]),

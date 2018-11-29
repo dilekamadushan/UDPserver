@@ -71,12 +71,8 @@ public class CommandAcceptor extends Thread {
     
     public void run() {
         
-        System.out.println("Search Query Acceptor : Here are the names of files I have");
-        fileNames.forEach(System.out::println);
-        System.out.println("Search Query Acceptor : inside startWork Method");
         Scanner reader = new Scanner(System.in);  // Reading from System.in
         while (running) {
-            System.out.println("Search Query Acceptor : inside event loop");
             
             System.out.println("Search Query Acceptor :Enter a search query: ");
             String query = reader.nextLine(); // Scans the next token of the input as a string.
@@ -169,7 +165,6 @@ public class CommandAcceptor extends Thread {
     }
     
     public void submitSearchRequest(String keyword) {
-        System.out.println("Search Query Acceptor: accepted query: " + keyword + " resetting search results");
         if (!Objects.equals("", keyword)) {
             searchResult.reset();
             previousSearchRequests.removeAll(previousSearchRequests);
@@ -180,7 +175,6 @@ public class CommandAcceptor extends Thread {
                     new SearchRequestAcceptor(packetCount, hopsCount, this.datagramSocket, routingTable, fileNames, myNode,
                             getFullMessage("SER " + myNode.getIpString() + " " + myNode.getPort() + " " + keyword + " "
                                     + searchRequestId + " 0"), true, previousSearchRequests, searchResult));
-            System.out.println("Search Query Acceptor : created a SearchRequestAcceptor thread");
             searchRequestId += 1;
         } else {
             System.out.println("Search Query Acceptor: accepted query: " + keyword

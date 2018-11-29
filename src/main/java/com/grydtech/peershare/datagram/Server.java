@@ -125,35 +125,28 @@ public class Server extends Thread {
     
     public void run() {
         try {
-            System.out.println("Server Thread: Before registering the server");
             running = this.registerAndJoinMessenger.start();
-            System.out.println("Server Thread:This is the status 1st place" + running);
-            System.out.println("Server Thread: Register and join messenger started");
+          
             fileNames = getFile("Files/fileNames.txt");
-            System.out.println("Server Thread: No of files is:" + fileNames.size());
+           
             commandAcceptor = new CommandAcceptor(running, UDPsocket, routingTable, searchResult, fileNames, myNode,
                     previousSearchRequsts, previousSearchResponses, packetCount,hopsCount, BSIP, BSPort, threadPool);
             commandAcceptor.start();
-            System.out.println("Server Thread: Query acceptor started");
+          
             GossipSender gossipSender = new GossipSender(running, UDPsocket, myNode, routingTable);
             gossipSender.start();
-            System.out.println("Server Thread: Gossip Sender started");
             
             KafkaProducer kafkaProducer = new KafkaProducer(kafkaIP,myNode, routingTable, running);
             kafkaProducer.start();
-            System.out.println("Server Thread: Kafka producer started");
-            
+           
             HeartBeatSender heartBeatSender = new HeartBeatSender(running, registerAndJoinMessenger, UDPsocket, myNode, BSIP,
                     BSPort, routingTable);
             heartBeatSender.start();
-            System.out.println("Server Thread: Heart Beat Sender started");
+           
             kafkaLogger = new KafkaLogger(kafkaIP,running);
-            
-            System.out.println("Server Thread: Kafka logger started");
             
             webUpdater = new WebUpdater(running, searchResult, simpMessagingTemplate);
             webUpdater.start();
-            System.out.println("Server Thread: Web Updater started");
         }
         catch (ConnectException ce) {
             System.out.println("Server Thread:Bootstrap server unreachable");
@@ -165,11 +158,9 @@ public class Server extends Thread {
             UDPsocket.close();
         }
         long executionTime;
-        System.out.println("Server Thread:This is the status " + running);
+      
         if (running)
-            System.out.println("Server Thread: Server Successfully Registered at " + myIP + " " + myPort);
         while (running) {
-            System.out.println("Server Thread:Server inside the running loop");
             executionTime = System.currentTimeMillis();
             if ((executionTime - programeStartedTime) / 1000 > 12000000) {
                 System.out.println("Server Thread: More than 10 minutes since the start");
@@ -180,13 +171,10 @@ public class Server extends Thread {
                     break;
                 }
             }
-            System.out.println("Server Thread:Server listening....");
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
             try {
                 UDPsocket.receive(packet);
-                System.out.println("Server Thread: Server received a packet ");
                 packetCount += 1;
-                System.out.println("Server Thread: Data packets:" + packetCount);
             }
             catch (IOException e) {
                 e.printStackTrace();
@@ -195,18 +183,12 @@ public class Server extends Thread {
             }
             
             String request = new String(packet.getData(), 0, packet.getLength());
-            System.out.println("Server Thread:In server received " + request);
             boolean whoseResponse = false;
             while (!whoseResponse) {
-                System.out.println("Server Thread:Trying to identify the handler for the packet " + request);
                 whoseResponse = checkForJoinResponseMessage(request);
                 
                 if (whoseResponse) {
-                    System.out.println(
-                            "Server Thread:JOINOK messeage Packet to be handled by Routing Table manager " + routingTable
-                                    .size() + " ");
                     this.threadPool.execute(new JoinResponseAcceptor(this.UDPsocket, routingTable, packet));
-                    System.out.println("Server Thread: One Routing table manager started");
                     kafkaLogger.log(myIdForDisplay, "JOINOK");
                     break;
                     
@@ -214,9 +196,7 @@ public class Server extends Thread {
                 whoseResponse = checkForJoinRequestMessage(request);
                 if (whoseResponse) {
                     
-                    System.out.println("Server Thread:JOIN messeage Packet to be handled by Join Requestor ");
-                    this.threadPool.execute(new JoinRequestAcceptor(this.UDPsocket, routingTable, myNode, request));
-                    System.out.println("Server Thread: One Join Request Acceptor started");
+                     this.threadPool.execute(new JoinRequestAcceptor(this.UDPsocket, routingTable, myNode, request));
                     kafkaLogger.log(myIdForDisplay, "JOIN");
                     break;
                     
@@ -225,58 +205,42 @@ public class Server extends Thread {
                 whoseResponse = checkForSearchResponseMessage(request);
                 if (whoseResponse) {
                     
-                    System.out.println("Server Thread:SEROK messeage Packet to be handled by SEARCH Response handler");
                     this.threadPool.execute(
                             new SearcheResponseAcceptor(packetCount, routingTable, previousSearchResponses, myNode,
                                     searchResult, request));
-                    System.out.println("Server Thread: One Search Response Acceptor started");
                     kafkaLogger.log(myIdForDisplay, "SEROK");
                     break;
                     
                 }
                 
-                //System.out.println("Server Thread:Not SEROK message");
                 whoseResponse = checkForSearchRequestMessage(request);
                 if (whoseResponse) {
-                    System.out.println("Server Thread:SER messeage Packet to be handled by SEARCH Request handler ");
                     this.threadPool.execute(
                             new SearchRequestAcceptor(packetCount,hopsCount, this.UDPsocket, routingTable, fileNames, myNode, request,
                                     false, previousSearchRequsts, searchResult));
-                    System.out.println("Server Thread: One Search Request Acceptor started");
                     kafkaLogger.log(myIdForDisplay, "SER");
                     break;
                 }
                 
-               // System.out.println("Server Thread:Not SER message");
                 whoseResponse = checkForGossipRequestMessage(request);
                 if (whoseResponse) {
-                    System.out.println("Server Thread:GOSSIP messeage Packet to be handled by GOSSIP handler ");
                     this.threadPool.execute(new GossipAcceptor(routingTable, myNode, request));
-                    System.out.println("Server Thread: One GOSSIP handler started");
                     kafkaLogger.log(myIdForDisplay, "GOSSIP");
                     break;
                 }
                 
-                //System.out.println("Server Thread:Not GOSSIP message");
                 whoseResponse = checkForHeartBeatMessage(request);
                 if (whoseResponse) {
-                    System.out.println("Server Thread:HeartBeat messeage Packet to be handled by HeartBeat handler ");
                     this.threadPool.execute(new HeartBeatRequestAcceptor(routingTable, myNode, request));
-                    System.out.println("Server Thread: Heart Beat Acceptor started");
                     break;
                 }
                 
-                System.out.println("Server Thread:Not GOSSIP message");
                 whoseResponse = checkForLeaveRequestMessage(request);
                 if (whoseResponse) {
-                    System.out
-                            .println("Server Thread:Leave Request messeage Packet to be handled by Leave Request  handler ");
                     this.threadPool.execute(new LEAVERequestAcceptor(this.UDPsocket, routingTable, myNode, request));
-                    System.out.println("Server Thread: Heart Beat Acceptor started");
                     break;
                 }
                 
-                //System.out.println("Server Thread:Not LEAVE request message");
                 System.out.println("Server Thread: Couldn't Figure Out the handler for message " + request);
                 whoseResponse = true;
             }
