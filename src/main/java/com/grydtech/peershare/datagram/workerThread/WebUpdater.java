@@ -26,11 +26,9 @@ public class WebUpdater extends Thread {
         this.running = running;
         this.searchResult = searchResult;
         this.simpMessagingTemplate = simpMessagingTemplate;
-        System.out.println("Web Updater: Thread started");
     }
     
     public void run() {
-        System.out.println("Web Updater: Entering data sending loop");
         
         while (running) {
             sendDataToWeb();

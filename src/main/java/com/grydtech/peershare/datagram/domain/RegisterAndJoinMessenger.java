@@ -55,14 +55,11 @@ public class RegisterAndJoinMessenger {
     }
     
     public boolean start() throws IOException {
-        System.out.println("Register and Join Messenger:Started");
         boolean isRegistered = Register(BSIP, BSPort,
                 "REG " + myNode.getIpString() + " " + myNode.getPort() + " " + myNode.getNodeName());
         
         if (isRegistered) {
-            System.out.println("Register and Join Messenger:Bootstrap Server Successfully Registered");
             boolean isJoinSent;
-            System.out.println("Register and Join Messenger:Trying to send join messages to nodes");
             System.out.println("Register and Join Messenger:The size of toJoinNodesMethod " + toJoinNodes.size());
             
             isJoinSent = sendJoin();
@@ -76,7 +73,6 @@ public class RegisterAndJoinMessenger {
     private boolean Register(String BSIp, int BSPort, String msg) throws IOException {
         msg = getMessageLength(msg);
         System.out.println("Register and Join Messenger:REG  message from node " + msg);
-        System.out.println("Register and Join Messenger:Trying to create a TCP connection to send REG");
         TCPSocket = new Socket(BSIp, BSPort);
         out = new PrintWriter(TCPSocket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(TCPSocket.getInputStream()));
@@ -87,7 +83,6 @@ public class RegisterAndJoinMessenger {
         char[] chars = new char[8192];
         int read = in.read(chars);
         String inMesssage = String.valueOf(chars, 0, read);
-        System.out.println("Register and Join Messenger:Reply from BS server:" + inMesssage);
         TCPSocket.close();
         out.close();
         in.close();
@@ -184,8 +179,6 @@ public class RegisterAndJoinMessenger {
     }
     
     public boolean sendJoin() throws IOException {
-        System.out.println("Register and Join Messenger:Inside Send Join method");
-        
         if (toJoinNodes.size() <= 2) {
             System.out.println("Register and Join Messenger:Inside Send Join method and sending Join message to all nodes "
                     + toJoinNodes.size());
@@ -193,9 +186,6 @@ public class RegisterAndJoinMessenger {
             for (Node node : nodes) {
                 triedToJoinNodes.add(node);
                 try {
-                    System.out.println(
-                            "Register and Join Messenger: Trying to send join message for node" + node.toString() + " "
-                                    + node.getIpString());
                     String message = getMessageLength("JOIN " + myNode.getIpString() + " " + myNode.getPort());
                     byte[] bufToSend = message.getBytes();
                     DatagramPacket nodeDatagramPacket = new DatagramPacket(bufToSend, bufToSend.length,

@@ -8,7 +8,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -56,8 +55,8 @@ public class SearchRequestAcceptor implements Runnable {
         this.previousSearchRequests = previousSearchRequests;
         this.packetCount = packetCount;
         this.hopsCount=hopsCount;
-        System.out.println(
-                packetCount + " SearchRequestAcceptor:Thread started:" + System.currentTimeMillis() / 1000 + request);
+       // System.out.println(
+              //  packetCount + " SearchRequestAcceptor:Thread started:" + System.currentTimeMillis() / 1000 + request);
     }
     
     public void run() {
@@ -72,15 +71,10 @@ public class SearchRequestAcceptor implements Runnable {
                 .orElse(null);
         
         if (previousSearch == null) {
-            System.out.println(packetCount + "SearchRequestAcceptor :" + System.currentTimeMillis() + request
-                    + " is a new search request");
-            System.out.println(packetCount + "SearchRequestAcceptor : no.of hops:" + params[params.length - 1]);
             if (hopsCount < Integer.parseInt(hops)) {
                 System.out.println(packetCount + "SearchRequestAcceptor:Number of hops is greater than 7: " + params[6]);
-                System.out.println(packetCount + "SearchRequestAcceptor:The request is dropped");
                 
             } else {
-                System.out.println(packetCount + "SearchRequestAcceptor:The no.of hops <="+hopsCount);
                 searchQuery = new StringBuilder();
                 searchRequest = new StringBuilder();
                 for (int i = 4; i < params.length - 2; i++) {
@@ -92,21 +86,16 @@ public class SearchRequestAcceptor implements Runnable {
                         searchRequest.append(params[i]);
                     }
                 }
-                System.out.println(
-                        packetCount + "SearchRequestAcceptor:search query:" + searchQuery.toString() + " " + searchRequest
-                                .toString());
+               
                 List<String> foundFiles = fileNames.stream()
                         .filter(s -> tokenWiseSearch(s.toLowerCase(), searchQuery.toString().toLowerCase()))
                         .collect(toList());
                 
                 if (foundFiles.size() != 0) {
-                    System.out.println(packetCount + "SearchRequestAcceptor:The size of foundFiles:" + foundFiles.size());
                     if (isHomeMade) {
-                        System.out.println(packetCount + "SearchRequestAcceptor:search request is home made");
+                       // System.out.println(packetCount + "SearchRequestAcceptor:search request is home made");
                         for (String fileName : foundFiles) {
-                            System.out.println(
-                                    packetCount + "SearchRequestAcceptor:adding to the search result " + fileName + " "
-                                            + myNode.getIpString());
+                           // System.out.println(packetCount + "SearchRequestAcceptor:adding to the search result " + fileName + " " + myNode.getIpString());
                             searchResult.addFileName(fileName);
                             searchResult.addNode(myNode);
                             searchResult.addSearchResponse(request);
@@ -114,36 +103,36 @@ public class SearchRequestAcceptor implements Runnable {
                         }
                         
                     } else {
-                        System.out.println(packetCount + "SearchRequestAcceptor:search request is not home made");
+                       // System.out.println(packetCount + "SearchRequestAcceptor:search request is not home made");
                         try {
                             sendSearchResponse(params[2], params[3],hops, foundFiles);
-                            System.out.println(packetCount + "SearchRequestAcceptor:search response sent ");
+                            //System.out.println(packetCount + "SearchRequestAcceptor:search response sent ");
                             
-                            System.out.println(packetCount
-                                    + "SearchRequestAcceptor: thread waiting to send the second search response burst");
+                            //System.out.println(packetCount
+                               //     + "SearchRequestAcceptor: thread waiting to send the second search response burst");
                             
                             Thread.sleep(500);
                             
                             sendSearchResponse(params[2], params[3], hops,foundFiles);
-                            System.out.println(
-                                    packetCount + "SearchRequestAcceptor: sent the second udp burst" + params[2] + " "
-                                            + params[3]);
+                            //System.out.println(
+                                  //  packetCount + "SearchRequestAcceptor: sent the second udp burst" + params[2] + " "
+                                         //   + params[3]);
                             
                         }
                         catch (InterruptedException e) {
                             e.printStackTrace();
-                            System.out.println("SearchRequestAcceptor: Error in sending search second udp response burst");
+                           // System.out.println("SearchRequestAcceptor: Error in sending search second udp response burst");
                         }
                         catch (IOException e) {
                             e.printStackTrace();
-                            System.out.println(packetCount + "SearchRequestAcceptor: Error in sending search response");
+                            //System.out.println(packetCount + "SearchRequestAcceptor: Error in sending search response");
                         }
                     }
                     
                 }
-                System.out.println(packetCount + "SearchRequestAcceptor:Finished dealing with filenames");
+              //  System.out.println(packetCount + "SearchRequestAcceptor:Finished dealing with filenames");
                 if (hopsCount > Integer.parseInt(hops)) {
-                    System.out.println(packetCount + "SearchRequestAcceptor:Trying to send search request for other nodes");
+                    //System.out.println(packetCount + "SearchRequestAcceptor:Trying to send search request for other nodes");
                     for (Node node : routingTable) {
                         try {
                             if (!Objects.equals(node.getIpString(), params[2])) {
@@ -151,86 +140,46 @@ public class SearchRequestAcceptor implements Runnable {
                                     sendSearchRequest(node, Integer.parseInt(params[params.length - 1]) + 1, params[2],
                                             params[3], searchRequest.toString());
                                     
-                                    System.out.println(
-                                            packetCount + "SearchRequestAcceptor: sent the search request" + node.toString()
-                                                    + " " + params[2] + " " + params[3]);
-                                    System.out.println(
-                                            packetCount + "SearchRequestAcceptor: thread waiting to send the second burst");
-                                    
+                                   
                                     Thread.sleep(500);
                                     
                                     sendSearchRequest(node, Integer.parseInt(params[params.length - 1]) + 1, params[2],
                                             params[3], searchRequest.toString());
-                                    System.out.println(
-                                            packetCount + "SearchRequestAcceptor: sent the second udp burst" + node
-                                                    .toString() + " " + params[2] + " " + params[3]);
-                                } else if(node.isStatus()) {
+                                    } else if(node.isStatus()) {
                                     sendSearchRequest(node, Integer.parseInt(params[params.length - 1]) + 1,
                                             params[2], params[3], searchRequest.toString());
-                                    System.out.println(
-                                            packetCount + "SearchRequestAcceptor: sent the search request" + node.toString()
-                                                    + " " + params[2] + " " + params[3]);
-                                    System.out.println(
-                                            packetCount + "SearchRequestAcceptor: thread waiting to send the second burst");
-                                    
+                                   
                                     Thread.sleep(500);
                                     
                                     sendSearchRequest(node, Integer.parseInt(params[params.length - 1]) + 1,
                                             params[2], params[3], searchRequest.toString());
-                                    System.out.println(
-                                            packetCount + "SearchRequestAcceptor: sent the second udp burst" + node
-                                                    .toString() + " " + params[2] + " " + params[3]);
-                                }
+                                     }
                                 
                             } else {
-                                System.out.println(
-                                        packetCount + "SearchRequestAcceptor: Both ip equal" + node.getPort() + " "
-                                                + params[3]);
                                 if (node.getPort() != Integer.parseInt(params[3])) {
                                     if (node.isJoined()) {
                                         sendSearchRequest(node, Integer.parseInt(params[params.length - 1]) + 1, params[2],
                                                 params[3], searchRequest.toString());
                                         
-                                        System.out.println(
-                                                packetCount + "SearchRequestAcceptor: sent the search request" + node
-                                                        .toString() + " " + params[2] + " " + params[3]);
-                                        System.out.println(packetCount
-                                                + "SearchRequestAcceptor: thread waiting to send the second burst");
-                                        
+                                       
                                         Thread.sleep(500);
                                         
                                         sendSearchRequest(node, Integer.parseInt(params[params.length - 1]) + 1, params[2],
                                                 params[3], searchRequest.toString());
-                                        System.out.println(
-                                                packetCount + "SearchRequestAcceptor: sent the second udp burst" + node
-                                                        .toString() + " " + params[2] + " " + params[3]);
-                                    } else if (node.isStatus()){
+                                        } else if (node.isStatus()){
                                         sendSearchRequest(node,
                                                 Integer.parseInt(params[params.length - 1]) + 1, params[2],
                                                 params[3], searchRequest.toString());
-                                        System.out.println(
-                                                packetCount + "SearchRequestAcceptor: sent the search request" + node
-                                                        .toString() + " " + params[2] + " " + params[3]);
-                                        System.out.println(packetCount
-                                                + "SearchRequestAcceptor: thread waiting to send the second burst");
-                                        
-                                        Thread.sleep(500);
+                                       Thread.sleep(500);
                                         
                                         sendSearchRequest(node,
                                                 Integer.parseInt(params[params.length - 1]) + 1, params[2],
                                                 params[3], searchRequest.toString());
-                                        System.out.println(
-                                                packetCount + "SearchRequestAcceptor: sent the second udp burst" + node
-                                                        .toString() + " " + params[2] + " " + params[3]);
-                                    }
+                                        }
                                     
                                 }
                             }
-                            System.out.println(
-                                    packetCount + "SearchRequestAcceptor:" + node.getIpString() + " " + params[2] + " "
-                                            + params[3]);
-                            
-                        }
+                            }
                         catch (InterruptedException e) {
                             System.out.println(packetCount + "SearchRequestAcceptor:second udp burst failed");
                             e.printStackTrace();
@@ -245,21 +194,14 @@ public class SearchRequestAcceptor implements Runnable {
                         }
                     }
                 } else {
-                    System.out
-                            .println(packetCount + "SearchRequestAcceptor:Search request is not forewarded to other nodes");
-                }
+                     }
             }
             
             if (!isHomeMade) {
                 
-                System.out.println(packetCount
-                        + "SearchRequestAcceptor:Trying to check the node whether it exists because not home made");
                 String[] ips = params[2].replace(".", " ").split(" ");
                 
-                System.out.println(
-                        packetCount + "SearchRequestAcceptor:Trying to check the node whether it exists " + ips[0] + " "
-                                + params[2]);
-                Node node = new Node(new byte[] { (byte) Integer.parseInt(ips[0]), (byte) Integer.parseInt(ips[1]),
+                 Node node = new Node(new byte[] { (byte) Integer.parseInt(ips[0]), (byte) Integer.parseInt(ips[1]),
                         (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, Integer.parseInt(params[3]),
                         "FromSearchRequest", UUID.randomUUID());
                 node.setIpString(params[2]);
@@ -268,15 +210,12 @@ public class SearchRequestAcceptor implements Runnable {
                         .orElse(null);
                 if (newNode == null && !(node.getIpString().equals(myNode.getIpString()) && node.getPort() == myNode
                         .getPort())) {
-                    System.out.println(packetCount + "SearchRequestAcceptor: adding a new node to table");
-                    
                     node.setIdForDisplay(Integer.parseInt(params[3].substring(params[3].length() - 1)));
                     node.setStatus(true);
                     node.setDiscoveredBy("From search response " + request);
                     routingTable.add(node);
                     routingTable.add(node);
-                    System.out.println(packetCount + "SearchRequestAcceptor: added a new node to table" + node.toString());
-                } else if (newNode != null) {
+                     } else if (newNode != null) {
                     newNode.setStatus(true);
                     if (Objects.equals(newNode.getDiscoveredBy(), "")) {
                         newNode.setDiscoveredBy("From search request " + request);
@@ -285,26 +224,14 @@ public class SearchRequestAcceptor implements Runnable {
             }
             
             previousSearchRequests.add(request);
-            System.out.println(
-                    packetCount + "SearchRequestAcceptor: added search request to cache" + System.currentTimeMillis()
-                            + request);
             
         } else {
-            System.out.println(
-                    packetCount + "SearchRequestAcceptor:Search request is abandoned. It was received earlier " + System
-                            .currentTimeMillis() + previousSearch + " " + request);
-        }
+           }
     }
     
     private void sendSearchRequest(Node node, int hop, String ip, String port, String searchQuery) throws IOException {
-        System.out.println(
-                packetCount + "SearchRequestAcceptor:Trying to send search query for node" + node.toString() + " " + Arrays
-                        .toString(node.getIp()));
-        String newRequest = "SER " + ip + " " + port + " " + searchQuery + " "+requestId +" "+hop;
-        System.out.println(packetCount + "SearchRequestAcceptor:in sendSearchRequest method " + newRequest);
-        //add a cache to check stop requests
-        
-        String finalMessage = getMessageLength(newRequest);
+         String newRequest = "SER " + ip + " " + port + " " + searchQuery + " "+requestId +" "+hop;
+         String finalMessage = getMessageLength(newRequest);
         byte[] bufToSend = finalMessage.getBytes();
         DatagramPacket nodeDatagramPacket = new DatagramPacket(bufToSend, bufToSend.length,
                 InetAddress.getByAddress(node.getIp()), node.getPort());
@@ -317,17 +244,14 @@ public class SearchRequestAcceptor implements Runnable {
         for (String fileName : fileNames) {
             body.append(" ").append(fileName);
         }
-        System.out.println(packetCount + "SearchRequestAcceptor:Trying to send search response for node" + ip + " " + port);
         String messge = getMessageLength(
                 "SEROK " + fileNames.size() + " " + myNode.getIpString() + " " + myNode.getPort() + " "+ hops+body.toString());
         
         byte[] bufToSend = messge.getBytes();
-        System.out.println(packetCount + "SearchRequestAcceptor:Trying to send search response for node:" + messge+":");
-        DatagramPacket nodeDatagramPacket = new DatagramPacket(bufToSend, bufToSend.length, InetAddress.getByName(ip),
+         DatagramPacket nodeDatagramPacket = new DatagramPacket(bufToSend, bufToSend.length, InetAddress.getByName(ip),
                 Integer.parseInt(port));
         threadDatagramSocket.send(nodeDatagramPacket);
-        System.out.println(packetCount + "SearchRequestAcceptor:sent search response for node");
-    }
+        }
     
     private String getMessageLength(String message) {
         int size = message.length() + 5;

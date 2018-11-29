@@ -34,8 +34,8 @@ public class SearcheResponseAcceptor extends Thread {
         this.myNode = myNode;
         this.previousSearchResponses = previousSearchResponses;
         this.packetCount = packetCount;
-        System.out.println(
-                packetCount + "Search Response Acceptor:Thread started " + System.currentTimeMillis() + searchResponse);
+        //System.out.println(
+               // packetCount + "Search Response Acceptor:Thread started " + System.currentTimeMillis() + searchResponse);
     }
     
     public void run() {
@@ -46,9 +46,7 @@ public class SearcheResponseAcceptor extends Thread {
                 .filter(s -> s.contains(params[2]) && s.contains(params[3]) && s.contains(params[4])).findFirst()
                 .orElse(null);
         if (previousSearchResponse == null) {
-            System.out.println(
-                    packetCount + "Search Response Acceptor:no previous search request " + System.currentTimeMillis()
-                            + searchResponse);
+           
             String[] ips = params[3].replace(".", " ").split(" ");
             Node node = new Node(new byte[] { (byte) Integer.parseInt(ips[0]), (byte) Integer.parseInt(ips[1]),
                     (byte) Integer.parseInt(ips[2]), (byte) Integer.parseInt(ips[3]) }, Integer.parseInt(params[4]),
@@ -72,12 +70,12 @@ public class SearcheResponseAcceptor extends Thread {
             }
             
             for (int i = 6; i < params.length; i++) {
-                System.out.println(
-                        packetCount + "Search Response Acceptor:Checking for response " + params[i].toLowerCase() + " "
-                                + searchQuery.toString());
+               // System.out.println(
+                       // packetCount + "Search Response Acceptor:Checking for response " + params[i].toLowerCase() + " "
+                              //  + searchQuery.toString());
                 if (searchResult.isInUse() && params[i].toLowerCase().contains(searchQuery.toString().toLowerCase())) {
                     searchResult.addFileName(params[i]);
-                    System.out.println(" Search Response Acceptor:Filename " + params[i]+" "+searchQuery.toString());
+                   // System.out.println(" Search Response Acceptor:Filename " + params[i]+" "+searchQuery.toString());
                     if (newNode != null) {
                         searchResult.addNode(newNode);
                     } else {
@@ -85,17 +83,17 @@ public class SearcheResponseAcceptor extends Thread {
                     }
                     searchResult.addSearchResponse(searchResponse);
                     searchResult.addSearchHops(params[5]);
-                    System.out.println(packetCount + "Search Response Acceptor:Found node " + node.toString());
+                   // System.out.println(packetCount + "Search Response Acceptor:Found node " + node.toString());
                 } else {
-                    System.out.println(
-                            packetCount + "Search Response Acceptor:search response abandoned" + searchResult.isInUse() + " "
-                                    + searchQuery.toString().toLowerCase() + " " + params[i].toLowerCase());
+                   // System.out.println(
+                           // packetCount + "Search Response Acceptor:search response abandoned" + searchResult.isInUse() + " "
+                                  //  + searchQuery.toString().toLowerCase() + " " + params[i].toLowerCase());
                 }
             }
             
             if (newNode == null && !(node.getIpString().equals(myNode.getIpString()) && node.getPort() == myNode
                     .getPort())) {
-                System.out.println(packetCount + "Search Response Acceptor:Found new node ");
+               // System.out.println(packetCount + "Search Response Acceptor:Found new node ");
                 node.setStatus(true);
                 node.setDiscoveredBy("From search response " + searchResponse);
                 routingTable.add(node);
@@ -108,14 +106,8 @@ public class SearcheResponseAcceptor extends Thread {
                 }
             }
             previousSearchResponses.add(searchResponse);
-            System.out.println(
-                    packetCount + "SearchResponseAcceptor: added search response to cache" + System.currentTimeMillis()
-                            + searchResponse);
             
         } else {
-            System.out.println(
-                    packetCount + "SearchResponseAcceptor:Search request is not processed. It was received earlier " + System
-                            .currentTimeMillis() + previousSearchResponse + " " + searchResponse);
         }
     }
 }
