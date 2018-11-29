@@ -21,7 +21,7 @@ stompClient.connect({}, function (frame1) {
     stompClient.subscribe('/topic/download', function (frame2) {
         const response = JSON.parse(frame2.body);
 
-        updateDownloadProgress(response.fileName, response.filePath, response.status);
+        updateDownloadProgress(response);
     });
 });
 
@@ -56,11 +56,14 @@ function updateSearchResults(results) {
     results.forEach(r => searchResults.push(r));
 }
 
-function updateDownloadProgress(fileName, filePath, status) {
+function updateDownloadProgress(response) {
     downloadStatus.inProgress = false;
-    downloadStatus.fileName = fileName;
-    downloadStatus.filePath = filePath;
-    downloadStatus.status = status;
+    downloadStatus.fileName = response.fileName;
+    downloadStatus.filePath = response.filePath;
+    downloadStatus.receivedHash = response.receivedHash;
+    downloadStatus.generatedHash = response.generatedHash;
+    downloadStatus.fileSize = response.fileSize;
+    downloadStatus.status = response.status;
 
     $('#verificationModal').modal()
 }
